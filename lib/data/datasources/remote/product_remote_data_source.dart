@@ -4,6 +4,8 @@ import 'dio_client.dart';
 abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> getProducts(int page);
   Future<void> addProduct(ProductModel product);
+  Future<void> updateProduct(ProductModel product);
+  Future<void> deleteProduct(String id);
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -25,5 +27,15 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   @override
   Future<void> addProduct(ProductModel product) async {
     await _apiService.post('/products', data: product.toJson());
+  }
+
+  @override
+  Future<void> updateProduct(ProductModel product) async {
+    await _apiService.put('/products/${product.id}', data: product.toJson());
+  }
+
+  @override
+  Future<void> deleteProduct(String id) async {
+    await _apiService.delete('/products/$id');
   }
 }

@@ -78,9 +78,35 @@ class CatalogController extends GetxController {
   Future<void> addProduct(Product product) async {
     try {
       await _getProductsUseCase.addProduct(product);
-      loadProducts();
+      // Cập nhật cục bộ vào đầu danh sách để hiển thị ngay lập tức mà không cần gọi API tải lại
+      products.insert(0, product);
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+    }
+  }
+
+  Future<void> updateProduct(Product product) async {
+    try {
+      await _getProductsUseCase.updateProduct(product);
+      // Cập nhật cục bộ sản phẩm tại vị trí tương ứng trong danh sách
+      final index = products.indexWhere((p) => p.id == product.id);
+      if (index != -1) {
+        products[index] = product;
+      }
+    } catch (e) {
+      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteProduct(String id) async {
+    try {
+      await _getProductsUseCase.deleteProduct(id);
+      // Xóa cục bộ sản phẩm khỏi danh sách
+      products.removeWhere((p) => p.id == id);
+    } catch (e) {
+      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      rethrow;
     }
   }
 }

@@ -51,4 +51,44 @@ class ProductRepositoryImpl implements ProductRepository {
       throw Exception(AppStrings.networkError);
     }
   }
+
+  @override
+  Future<void> updateProduct(Product product) async {
+    try {
+      final productModel = ProductModel(
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        rating: product.rating,
+        category: product.category,
+        sku: product.sku,
+      );
+      await remoteDataSource.updateProduct(productModel);
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        throw Exception(AppStrings.loginAgain);
+      } else {
+        throw Exception(AppStrings.networkError);
+      }
+    } catch (e) {
+      throw Exception(AppStrings.networkError);
+    }
+  }
+
+  @override
+  Future<void> deleteProduct(String id) async {
+    try {
+      await remoteDataSource.deleteProduct(id);
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        throw Exception(AppStrings.loginAgain);
+      } else {
+        throw Exception(AppStrings.networkError);
+      }
+    } catch (e) {
+      throw Exception(AppStrings.networkError);
+    }
+  }
 }

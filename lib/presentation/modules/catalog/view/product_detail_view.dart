@@ -5,14 +5,74 @@ import '../../../../core/values/app_strings.dart';
 import '../../../../domain/entities/product.dart';
 import '../../../widgets/custom_button.dart';
 import '../../cart/controller/cart_controller.dart';
+import '../controller/catalog_controller.dart';
+import 'add_product_view.dart';
 
-class ProductDetailView extends StatelessWidget {
+class ProductDetailView extends StatefulWidget {
   const ProductDetailView({super.key});
 
   @override
+  State<ProductDetailView> createState() => _ProductDetailViewState();
+}
+
+class _ProductDetailViewState extends State<ProductDetailView> {
+  late Product currentProduct;
+
+  @override
+  void initState() {
+    super.initState();
+    currentProduct = Get.arguments as Product;
+  }
+
+  void _confirmDelete(BuildContext context, CatalogController catalogController) {
+    Get.defaultDialog(
+      title: 'Xóa sản phẩm',
+      middleText: 'Bạn có chắc chắn muốn xóa sản phẩm "${currentProduct.title}" không?',
+      textCancel: 'Hủy',
+      textConfirm: 'Xóa',
+      confirmTextColor: Colors.white,
+      buttonColor: AppTheme.errorColor,
+      onConfirm: () async {
+        Get.back(); // Đóng dialog xác nhận
+        
+        // Hiển thị loading dialog
+        Get.dialog(
+          const Center(
+            child: CircularProgressIndicator(color: AppTheme.primaryColor),
+          ),
+          barrierDismissible: false,
+        );
+
+        try {
+          await catalogController.deleteProduct(currentProduct.id);
+          Get.back(); // Đóng loading dialog
+          Get.back(); // Quay lại trang catalog
+          
+          Get.snackbar(
+            'Thành công',
+            'Đã xóa sản phẩm thành công!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF16A34A).withOpacity(0.9),
+            colorText: Colors.white,
+          );
+        } catch (e) {
+          Get.back(); // Đóng loading dialog
+          Get.snackbar(
+            'Lỗi',
+            e.toString().replaceFirst('Exception: ', ''),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: AppTheme.errorColor.withOpacity(0.9),
+            colorText: Colors.white,
+          );
+        }
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Product product = Get.arguments as Product;
     final cartController = Get.find<CartController>();
+    final catalogController = Get.find<CatalogController>();
 
     return Scaffold(
       body: Stack(
@@ -39,10 +99,66 @@ class ProductDetailView extends StatelessWidget {
                     onPressed: () => Get.back(),
                   ),
                 ),
+                actions: [
+                  // Nút Chỉnh sửa thông tin
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        color: AppTheme.onSurface,
+                        size: 20,
+                      ),
+                      onPressed: () async {
+                        final updated = await Get.to<Product>(
+                          () => AddProductView(product: currentProduct),
+                        );
+                        if (updated != null) {
+                          setState(() {
+                            currentProduct = updated;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  // Nút Xóa sản phẩm
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: AppTheme.errorColor,
+                        size: 20,
+                      ),
+                      onPressed: () => _confirmDelete(context, catalogController),
+                    ),
+                  ),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Hero(
-                    tag: 'product_${product.id}',
-                    child: Image.network(product.imageUrl, fit: BoxFit.cover),
+                    tag: 'product_${currentProduct.id}',
+                    child: Image.network(
+                      currentProduct.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: const Color(0xFFF7FAFC),
+                          child: const Icon(
+                            Icons.image_not_supported_rounded,
+                            color: AppTheme.neutralColor,
+                            size: 80,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -71,7 +187,7 @@ class ProductDetailView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              product.category.toUpperCase(),
+                              currentProduct.category.toUpperCase(),
                               style: const TextStyle(
                                 fontFamily: AppTheme.fontFamily,
                                 fontSize: 10,
@@ -82,7 +198,7 @@ class ProductDetailView extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'SKU: ${product.sku}',
+                            'SKU: ${currentProduct.sku}',
                             style: const TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 12,
@@ -96,7 +212,7 @@ class ProductDetailView extends StatelessWidget {
 
                       // Tiêu đề lớn
                       Text(
-                        product.title,
+                        currentProduct.title,
                         style: const TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 24,
@@ -117,7 +233,7 @@ class ProductDetailView extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            product.rating.toString(),
+                            currentProduct.rating.toString(),
                             style: const TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 14,
@@ -152,7 +268,7 @@ class ProductDetailView extends StatelessWidget {
 
                       // Chi tiết mô tả với chiều cao dòng thoáng mát (height: 1.5)
                       Text(
-                        product.description,
+                        currentProduct.description,
                         style: const TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 15,
@@ -208,7 +324,7 @@ class ProductDetailView extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '\$${product.price.toStringAsFixed(2)}',
+                          '\$${currentProduct.price.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 22,
@@ -224,7 +340,7 @@ class ProductDetailView extends StatelessWidget {
                       child: CustomButton(
                         text: AppStrings.addToCart,
                         icon: Icons.add_shopping_cart_rounded,
-                        onPressed: () => cartController.addToCart(product),
+                        onPressed: () => cartController.addToCart(currentProduct),
                       ),
                     ),
                   ],

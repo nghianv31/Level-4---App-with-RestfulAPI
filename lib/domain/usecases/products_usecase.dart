@@ -13,4 +13,12 @@ class GetProductsUseCase {
   Future<void> addProduct(Product product) {
     return repository.addProduct(product);
   }
+
+  Future<void> updateProduct(Product product) {
+    return repository.updateProduct(product);
+  }
+
+  Future<void> deleteProduct(String id) {
+    return repository.deleteProduct(id);
+  }
 }

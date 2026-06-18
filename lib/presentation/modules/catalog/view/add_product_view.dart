@@ -2,12 +2,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../data/models/product_model.dart';
+import '../../../../domain/entities/product.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_text_field.dart';
 import '../controller/catalog_controller.dart';
 
 class AddProductView extends StatefulWidget {
-  const AddProductView({super.key});
+  final Product? product;
+
+  const AddProductView({super.key, this.product});
 
   @override
   State<AddProductView> createState() => _AddProductViewState();
@@ -15,12 +18,14 @@ class AddProductView extends StatefulWidget {
 
 class _AddProductViewState extends State<AddProductView> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _skuController = TextEditingController();
-  final _categoryController = TextEditingController();
-  final _imageUrlController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  
+  late TextEditingController _titleController;
+  late TextEditingController _priceController;
+  late TextEditingController _skuController;
+  late TextEditingController _categoryController;
+  late TextEditingController _imageUrlController;
+  late TextEditingController _descriptionController;
+  
   final catalogController = Get.find<CatalogController>();
 
   // Danh sách ảnh mẫu ngẫu nhiên để sản phẩm tự động có ảnh Unsplash tuyệt đẹp
@@ -33,10 +38,20 @@ class _AddProductViewState extends State<AddProductView> {
 
   bool _isSaving = false;
   late Worker _errorWorker;
+  bool get _isEdit => widget.product != null;
 
   @override
   void initState() {
     super.initState();
+    
+    // Khởi tạo các controller theo chế độ tương ứng
+    _titleController = TextEditingController(text: _isEdit ? widget.product!.title : '');
+    _priceController = TextEditingController(text: _isEdit ? widget.product!.price.toString() : '');
+    _skuController = TextEditingController(text: _isEdit ? widget.product!.sku : '');
+    _categoryController = TextEditingController(text: _isEdit ? widget.product!.category : '');
+    _imageUrlController = TextEditingController(text: _isEdit ? widget.product!.imageUrl : '');
+    _descriptionController = TextEditingController(text: _isEdit ? widget.product!.description : '');
+
     // Lắng nghe biến errorMessage từ catalogController để hiển thị dialog khi có lỗi
     _errorWorker = ever(catalogController.errorMessage, (String message) {
       if (message.isNotEmpty) {
@@ -116,7 +131,7 @@ class _AddProductViewState extends State<AddProductView> {
     return null;
   }
 
-  void _saveProduct() async {
+  void _submitProduct() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSaving = true);
       catalogController.errorMessage.value = '';
@@ -127,29 +142,43 @@ class _AddProductViewState extends State<AddProductView> {
       final randomImage = _mockImages[Random().nextInt(_mockImages.length)];
       final enteredImageUrl = _imageUrlController.text.trim();
 
-      final newProduct = ProductModel(
-        id: 'p_new_${DateTime.now().millisecondsSinceEpoch}',
+      final submittedProduct = ProductModel(
+        id: _isEdit
+            ? widget.product!.id
+            : 'p_new_${DateTime.now().millisecondsSinceEpoch}',
         title: _titleController.text.trim(),
         price: double.parse(_priceController.text.trim()),
         description: _descriptionController.text.trim(),
-        imageUrl: enteredImageUrl.isNotEmpty ? enteredImageUrl : randomImage,
-        rating: 0.0, // Mặc định sản phẩm mới được 0.0 sao đánh giá
+        imageUrl: enteredImageUrl.isNotEmpty
+            ? enteredImageUrl
+            : (_isEdit ? widget.product!.imageUrl : randomImage),
+        rating: _isEdit ? widget.product!.rating : 0.0,
         category: _categoryController.text.trim().toUpperCase(),
         sku: _skuController.text.trim().toUpperCase(),
       );
 
-      // Gọi API addProduct qua controller và đợi kết quả
-      await catalogController.addProduct(newProduct);
+      // Gọi API tương ứng qua controller và đợi kết quả
+      if (_isEdit) {
+        try {
+          await catalogController.updateProduct(submittedProduct);
+        } catch (_) {}
+      } else {
+        try {
+          await catalogController.addProduct(submittedProduct);
+        } catch (_) {}
+      }
 
       setState(() => _isSaving = false);
 
       // Chỉ chuyển trang và báo thành công nếu không có lỗi xảy ra
       if (catalogController.errorMessage.isEmpty) {
-        Get.back(); // Quay lại trang danh sách sản phẩm
+        Get.back(result: submittedProduct); // Trả về sản phẩm để cập nhật màn chi tiết (nếu ở chế độ Edit)
 
         Get.snackbar(
           'Thành công',
-          'Đã thêm sản phẩm "${newProduct.title}" thành công!',
+          _isEdit
+              ? 'Đã cập nhật thông tin sản phẩm thành công!'
+              : 'Đã thêm sản phẩm "${submittedProduct.title}" thành công!',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF16A34A).withOpacity(0.9),
           colorText: Colors.white,
@@ -161,7 +190,9 @@ class _AddProductViewState extends State<AddProductView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Thêm Sản Phẩm Mới')),
+      appBar: AppBar(
+        title: Text(_isEdit ? 'Chỉnh Sửa Sản Phẩm' : 'Thêm Sản Phẩm Mới'),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -174,7 +205,7 @@ class _AddProductViewState extends State<AddProductView> {
                   // Trường Tên sản phẩm
                   CustomTextField(
                     labelText: 'Tên sản phẩm',
-                    hintText: 'Nhập tên sản phẩm mới',
+                    hintText: 'Nhập tên sản phẩm',
                     controller: _titleController,
                     prefixIcon: Icons.shopping_bag_outlined,
                     isRequired: true,
@@ -222,10 +253,10 @@ class _AddProductViewState extends State<AddProductView> {
                   // Trường URL hình ảnh
                   CustomTextField(
                     labelText: 'URL hình ảnh',
-                    hintText: 'Nhập URL hình ảnh (không bắt buộc)',
+                    hintText: _isEdit ? 'Nhập URL hình ảnh mới' : 'Nhập URL hình ảnh (không bắt buộc)',
                     controller: _imageUrlController,
                     prefixIcon: Icons.image_outlined,
-                    isRequired: false,
+                    isRequired: _isEdit, // Chế độ sửa cần hình ảnh cụ thể, thêm mới có thể bỏ trống để lấy ảnh random
                     validator: _validateImageUrl,
                   ),
                   const SizedBox(height: 20),
@@ -241,12 +272,12 @@ class _AddProductViewState extends State<AddProductView> {
                   ),
                   const SizedBox(height: 36),
 
-                  // Nút Lưu sản phẩm
+                  // Nút Lưu sản phẩm / Lưu thay đổi
                   CustomButton(
-                    text: 'Lưu sản phẩm',
-                    icon: Icons.add_circle_outline_rounded,
+                    text: _isEdit ? 'Lưu thay đổi' : 'Lưu sản phẩm',
+                    icon: _isEdit ? Icons.save_rounded : Icons.add_circle_outline_rounded,
                     isLoading: _isSaving,
-                    onPressed: _saveProduct,
+                    onPressed: _submitProduct,
                   ),
                 ],
               ),
