@@ -11,6 +11,7 @@ analyzer:
   errors:
     deprecated_member_use: ignore
     file_names: ignore
+    overridden_fields: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

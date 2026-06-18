@@ -86,29 +86,50 @@ class CatalogView extends GetView<CatalogController> {
           child: RefreshIndicator(
             color: AppTheme.primaryColor,
             backgroundColor: Colors.white,
-            onRefresh: () => controller.loadProducts(),
-            child: GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 2 cột
-                crossAxisSpacing: 12, // gutter 12px theo thiết kế
-                mainAxisSpacing: 16,
-                childAspectRatio:
-                    0.58, // Điều chỉnh tỷ lệ để cân đối ảnh 1:1 + nội dung chữ tránh overflow
-              ),
-              itemCount: controller.products.length,
-              itemBuilder: (context, index) {
-                final product = controller.products[index];
-                return ProductCard(
-                  product: product,
-                  onTap: () {
-                    Get.toNamed(Routes.productDetail, arguments: product);
-                  },
-                  onAddToCart: () {
-                    cartController.addToCart(product);
-                  },
-                );
-              },
+            onRefresh: () => controller.loadProducts(isRefresh: true),
+            child: CustomScrollView(
+              controller: controller.scrollController,
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // 2 cột
+                      crossAxisSpacing: 12, // gutter 12px theo thiết kế
+                      mainAxisSpacing: 16,
+                      childAspectRatio:
+                          0.58, // Điều chỉnh tỷ lệ để cân đối ảnh 1:1 + nội dung chữ tránh overflow
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final product = controller.products[index];
+                        return ProductCard(
+                          product: product,
+                          onTap: () {
+                            Get.toNamed(Routes.productDetail, arguments: product);
+                          },
+                          onAddToCart: () {
+                            cartController.addToCart(product);
+                          },
+                        );
+                      },
+                      childCount: controller.products.length,
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: controller.isLoadingMore.value
+                      ? const Padding(
+                          padding: EdgeInsets.only(bottom: 24.0, top: 8.0),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ),
           ),
         );
@@ -166,8 +187,20 @@ class CatalogView extends GetView<CatalogController> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => controller.loadProducts(),
-              child: const Text('Thử lại'),
+              onPressed: () {
+                if (controller.errorMessage.value == AppStrings.loginAgain) {
+                  Get.toNamed(Routes.login);
+                } else {
+                  controller.loadProducts();
+                }
+              },
+              child: Obx(() {
+                if (controller.errorMessage.value == AppStrings.loginAgain) {
+                  return const Text('Đăng nhập lại');
+                } else {
+                  return const Text('Thử lại');
+                }
+              }),
             ),
           ],
         ),

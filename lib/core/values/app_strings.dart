@@ -21,4 +21,7 @@ class AppStrings {
 
   static const String networkError =
       'Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại mạng!';
+
+  static const String loginAgain =
+      "Đã hết phiên đăng nhập. Vui lòng đăng nhập lại!";
 }

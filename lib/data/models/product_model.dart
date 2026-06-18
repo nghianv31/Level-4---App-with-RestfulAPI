@@ -1,40 +1,84 @@
+import 'package:hive/hive.dart';
 import '../../domain/entities/product.dart';
 
+part 'product_model.g.dart';
+
+@HiveType(typeId: 0)
 class ProductModel extends Product {
+  @override
+  @HiveField(0)
+  final String id;
+
+  @override
+  @HiveField(1)
+  final String title;
+
+  @override
+  @HiveField(2)
+  final double price;
+
+  @override
+  @HiveField(3)
+  final String description;
+
+  @override
+  @HiveField(4)
+  final String imageUrl;
+
+  @override
+  @HiveField(5)
+  final double rating;
+
+  @override
+  @HiveField(6)
+  final String category;
+
+  @override
+  @HiveField(7)
+  final String sku;
+
   const ProductModel({
-    required super.id,
-    required super.title,
-    required super.price,
-    required super.description,
-    required super.imageUrl,
-    required super.rating,
-    required super.category,
-    required super.sku,
-  });
+    required this.id,
+    required this.title,
+    required this.price,
+    required this.description,
+    required this.imageUrl,
+    required this.rating,
+    required this.category,
+    required this.sku,
+  }) : super(
+         id: id,
+         title: title,
+         price: price,
+         description: description,
+         imageUrl: imageUrl,
+         rating: rating,
+         category: category,
+         sku: sku,
+       );
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
+      id: json['id']?.toString() ?? '',
+      title: json['name'] ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       description: json['description'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-      category: json['category'] ?? '',
-      sku: json['sku'] ?? '',
+      imageUrl: json['image'] ?? '',
+      rating: 0.0,
+      category: json['category'] is Map ? (json['category']['name'] ?? '') : '',
+      sku: json['code'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'title': title,
-      'price': price,
-      'description': description,
-      'imageUrl': imageUrl,
-      'rating': rating,
-      'category': category,
-      'sku': sku,
+      "name": title,
+      "code": sku,
+      "price": price,
+      "stock": 100,
+      "category_id": 100,
+      "description": description,
+      "image": imageUrl,
     };
   }
 }
