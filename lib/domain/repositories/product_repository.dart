@@ -5,4 +5,9 @@ abstract class ProductRepository {
   Future<void> addProduct(Product product);
   Future<void> updateProduct(Product product);
   Future<void> deleteProduct(String id);
+
+  // product with cart 
+  Future<void> addProductToCart(Product product);
+  Future<void> removeProductFromCart(String id);
+  Future<List<Product>> getProductsCart();
 }

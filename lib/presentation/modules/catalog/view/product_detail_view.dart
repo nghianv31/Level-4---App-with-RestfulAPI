@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../../../core/theme/AppTheme.dart';
 import '../../../../core/values/app_strings.dart';
 import '../../../../domain/entities/product.dart';
-import '../../../widgets/custom_button.dart';
+import '../../widgets/custom_button.dart';
 import '../../cart/controller/cart_controller.dart';
 import '../controller/catalog_controller.dart';
 import 'add_product_view.dart';
@@ -340,7 +340,9 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       child: CustomButton(
                         text: AppStrings.addToCart,
                         icon: Icons.add_shopping_cart_rounded,
-                        onPressed: () => cartController.addToCart(currentProduct),
+                        onPressed: () {
+                          cartController.addToCart(currentProduct);
+                        },
                       ),
                     ),
                   ],

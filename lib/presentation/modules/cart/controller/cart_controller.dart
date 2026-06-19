@@ -1,53 +1,106 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../domain/entities/product.dart';
+import '../../../../domain/usecases/products_usecase.dart';
 
 class CartController extends GetxController {
-  // Bản đồ sản phẩm và số lượng phản ứng
-  final RxMap<Product, int> cartItems = <Product, int>{}.obs;
+  final GetProductsUseCase productUseCase;
 
-  void addToCart(Product product) {
-    if (cartItems.containsKey(product)) {
-      cartItems[product] = cartItems[product]! + 1;
-    } else {
-      cartItems[product] = 1;
+  CartController(this.productUseCase);
+
+  final RxList<Product> productsCart = <Product>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxString error = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadCart();
+  }
+
+  Future<void> loadCart() async {
+    isLoading.value = true;
+    try {
+      final list = await productUseCase.getProductsCart();
+      productsCart.assignAll(list);
+    } catch (e) {
+      error.value = e.toString();
+    } finally {
+      isLoading.value = false;
     }
-    Get.snackbar(
-      'Giỏ hàng',
-      'Đã thêm "${product.title}" vào giỏ hàng!',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 1),
-    );
   }
 
-  void decreaseQuantity(Product product) {
-    if (!cartItems.containsKey(product)) return;
-    
-    if (cartItems[product]! > 1) {
-      cartItems[product] = cartItems[product]! - 1;
-    } else {
-      cartItems.remove(product);
+  void addToCart(Product product) async {
+    isLoading.value = true;
+    try {
+      await productUseCase.addProductToCart(product);
+      await loadCart();
+      Get.snackbar(
+        'Giỏ hàng',
+        'Đã thêm "${product.title}" vào giỏ hàng!',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 1),
+      );
+    } catch (e) {
+      error.value = e.toString();
+      Get.snackbar(
+        'Lỗi giỏ hàng',
+        'Không thể thêm sản phẩm: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  void removeFromCart(Product product) {
-    cartItems.remove(product);
-    Get.snackbar(
-      'Giỏ hàng',
-      'Đã xóa "${product.title}" khỏi giỏ hàng!',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 1),
-    );
+  void removeFromCart(Product product) async {
+    isLoading.value = true;
+    try {
+      await productUseCase.removeProductFromCart(product.id);
+      await loadCart();
+      Get.snackbar(
+        'Giỏ hàng',
+        'Đã xóa "${product.title}" khỏi giỏ hàng!',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 1),
+      );
+    } catch (e) {
+      error.value = e.toString();
+      Get.snackbar(
+        'Lỗi giỏ hàng',
+        'Không thể xóa sản phẩm: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void clearCart() {
-    cartItems.clear();
+  void clearCart() async {
+    isLoading.value = true;
+    try {
+      for (var item in productsCart) {
+        await productUseCase.removeProductFromCart(item.id);
+      }
+      await loadCart();
+    } catch (e) {
+      error.value = e.toString();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   int get totalItems {
-    return cartItems.values.fold(0, (sum, quantity) => sum + quantity);
+    return productsCart.length;
   }
 
   double get totalPrice {
-    return cartItems.entries.fold(0.0, (sum, entry) => sum + (entry.key.price * entry.value));
+    return productsCart.fold(0.0, (sum, item) => sum + item.price);
   }
 }

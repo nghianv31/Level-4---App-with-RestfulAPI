@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../data/models/product_model.dart';
 import '../../../../domain/entities/product.dart';
-import '../../../widgets/custom_button.dart';
-import '../../../widgets/custom_text_field.dart';
+import '../../widgets/custom_button.dart';
+import '../../widgets/custom_text_field.dart';
 import '../controller/catalog_controller.dart';
 
 class AddProductView extends StatefulWidget {
@@ -160,11 +160,11 @@ class _AddProductViewState extends State<AddProductView> {
       // Gọi API tương ứng qua controller và đợi kết quả
       if (_isEdit) {
         try {
-          await catalogController.updateProduct(submittedProduct);
+          await catalogController.updateProduct(submittedProduct.toEntity());
         } catch (_) {}
       } else {
         try {
-          await catalogController.addProduct(submittedProduct);
+          await catalogController.addProduct(submittedProduct.toEntity());
         } catch (_) {}
       }
 

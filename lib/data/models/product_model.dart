@@ -4,36 +4,28 @@ import '../../domain/entities/product.dart';
 part 'product_model.g.dart';
 
 @HiveType(typeId: 0)
-class ProductModel extends Product {
-  @override
+class ProductModel {
   @HiveField(0)
   final String id;
 
-  @override
   @HiveField(1)
   final String title;
 
-  @override
   @HiveField(2)
   final double price;
 
-  @override
   @HiveField(3)
   final String description;
 
-  @override
   @HiveField(4)
   final String imageUrl;
 
-  @override
   @HiveField(5)
   final double rating;
 
-  @override
   @HiveField(6)
   final String category;
 
-  @override
   @HiveField(7)
   final String sku;
 
@@ -46,16 +38,33 @@ class ProductModel extends Product {
     required this.rating,
     required this.category,
     required this.sku,
-  }) : super(
-         id: id,
-         title: title,
-         price: price,
-         description: description,
-         imageUrl: imageUrl,
-         rating: rating,
-         category: category,
-         sku: sku,
-       );
+  });
+
+  Product toEntity() {
+    return Product(
+      id: id,
+      title: title,
+      price: price,
+      description: description,
+      imageUrl: imageUrl,
+      rating: rating,
+      category: category,
+      sku: sku,
+    );
+  }
+
+  factory ProductModel.fromEntity(Product product) {
+    return ProductModel(
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      description: product.description,
+      imageUrl: product.imageUrl,
+      rating: product.rating,
+      category: product.category,
+      sku: product.sku,
+    );
+  }
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(

@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import '../../data/datasources/local/hiveSettings.dart';
+import '../bindings/initial_binding.dart';
 import '../bindings/login_binding.dart';
 import '../modules/login/view/login_view.dart';
-import '../bindings/catalog_binding.dart';
 import '../modules/catalog/view/catalog_view.dart';
 import '../modules/catalog/view/product_detail_view.dart';
 import '../modules/catalog/view/add_product_view.dart';
@@ -32,7 +32,7 @@ class AppPages {
     GetPage(
       name: _Paths.catalog,
       page: () => const CatalogView(),
-      binding: CatalogBinding(),
+      binding: InitialBinding(),
       transition: Transition.fadeIn,
     ),
     GetPage(
@@ -47,6 +47,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.cart,
+      binding: InitialBinding(),
       page: () => const CartView(),
       transition: Transition.rightToLeft,
     ),

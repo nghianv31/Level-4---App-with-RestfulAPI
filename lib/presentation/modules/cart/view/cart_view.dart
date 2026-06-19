@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/AppTheme.dart';
 import '../../../../core/values/app_strings.dart';
-import '../../../widgets/custom_button.dart';
+import '../../widgets/custom_button.dart';
 import '../controller/cart_controller.dart';
 
 class CartView extends GetView<CartController> {
@@ -15,7 +15,7 @@ class CartView extends GetView<CartController> {
         title: const Text(AppStrings.cartTitle),
       ),
       body: Obx(() {
-        if (controller.cartItems.isEmpty) {
+        if (controller.productsCart.isEmpty) {
           return _buildEmptyState();
         }
 
@@ -24,11 +24,9 @@ class CartView extends GetView<CartController> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: controller.cartItems.length,
+                itemCount: controller.productsCart.length,
                 itemBuilder: (context, index) {
-                  final entry = controller.cartItems.entries.elementAt(index);
-                  final product = entry.key;
-                  final quantity = entry.value;
+                  final product = controller.productsCart[index];
 
                   // Thêm hiệu ứng Swipe Action (Xóa bằng cách vuốt) theo đặc tả DESIGN.md
                   return Dismissible(
@@ -117,30 +115,14 @@ class CartView extends GetView<CartController> {
                             ),
                           ),
 
-                          // Nút tăng giảm số lượng
-                          Row(
-                            children: [
-                              _buildQtyBtn(
-                                icon: Icons.remove_rounded,
-                                onTap: () => controller.decreaseQuantity(product),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                child: Text(
-                                  quantity.toString(),
-                                  style: const TextStyle(
-                                    fontFamily: AppTheme.fontFamily,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.onSurface,
-                                  ),
-                                ),
-                              ),
-                              _buildQtyBtn(
-                                icon: Icons.add_rounded,
-                                onTap: () => controller.addToCart(product),
-                              ),
-                            ],
+                          // Nút xóa sản phẩm khỏi giỏ hàng
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppTheme.errorColor,
+                              size: 22,
+                            ),
+                            onPressed: () => controller.removeFromCart(product),
                           ),
                         ],
                       ),
@@ -153,24 +135,6 @@ class CartView extends GetView<CartController> {
           ],
         );
       }),
-    );
-  }
-
-  Widget _buildQtyBtn({required IconData icon, required VoidCallback onTap}) {
-    return Material(
-      color: const Color(0xFFF7FAFC),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Icon(icon, size: 16, color: AppTheme.onSurface),
-        ),
-      ),
     );
   }
 

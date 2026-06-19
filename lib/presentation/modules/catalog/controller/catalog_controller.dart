@@ -33,7 +33,7 @@ class CatalogController extends GetxController {
   void _onScroll() {
     if (scrollController.hasClients &&
         scrollController.position.pixels >=
-            scrollController.position.maxScrollExtent - 200) {
+            scrollController.position.maxScrollExtent - 300) {
       if (!isLoading.value && !isLoadingMore.value) {
         loadMore();
       }

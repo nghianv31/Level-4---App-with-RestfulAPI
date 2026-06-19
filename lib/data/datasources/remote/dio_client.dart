@@ -26,7 +26,7 @@ class ApiService {
   }
 
   ApiService._internal() : _dio = Dio() {
-    _dio.options.baseUrl = 'http://192.168.50.24:1997/api/v1';
+    _dio.options.baseUrl = 'http://10.0.2.2:1997/api/v1';
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
     _dio.interceptors.add(AuthInterceptor());

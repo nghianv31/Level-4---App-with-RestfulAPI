@@ -5,7 +5,7 @@ import '../../../../core/values/app_strings.dart';
 import '../../../../data/datasources/local/hiveSettings.dart';
 import '../../../../data/datasources/local/hiveToken.dart';
 import '../../../routes/app_pages.dart';
-import '../../../widgets/product_card.dart';
+import '../../widgets/product_card.dart';
 import '../../cart/controller/cart_controller.dart';
 import '../controller/catalog_controller.dart';
 
@@ -91,7 +91,10 @@ class CatalogView extends GetView<CatalogController> {
               controller: controller.scrollController,
               slivers: [
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2, // 2 cột
@@ -100,21 +103,18 @@ class CatalogView extends GetView<CatalogController> {
                       childAspectRatio:
                           0.58, // Điều chỉnh tỷ lệ để cân đối ảnh 1:1 + nội dung chữ tránh overflow
                     ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final product = controller.products[index];
-                        return ProductCard(
-                          product: product,
-                          onTap: () {
-                            Get.toNamed(Routes.productDetail, arguments: product);
-                          },
-                          onAddToCart: () {
-                            cartController.addToCart(product);
-                          },
-                        );
-                      },
-                      childCount: controller.products.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final product = controller.products[index];
+                      return ProductCard(
+                        product: product,
+                        onTap: () {
+                          Get.toNamed(Routes.productDetail, arguments: product);
+                        },
+                        onAddToCart: () {
+                          cartController.addToCart(product);
+                        },
+                      );
+                    }, childCount: controller.products.length),
                   ),
                 ),
                 SliverToBoxAdapter(

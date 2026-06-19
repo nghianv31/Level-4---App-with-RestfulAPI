@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/AppTheme.dart';
-import '../../domain/entities/product.dart';
+import '../../../core/theme/AppTheme.dart';
+import '../../../domain/entities/product.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -134,17 +134,22 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                       
-                      // Nút tròn Add To Cart
-                      Material(
-                        color: AppTheme.primaryColor,
-                        shape: const CircleBorder(),
-                        elevation: 0,
-                        child: InkWell(
-                          onTap: onAddToCart,
-                          customBorder: const CircleBorder(),
-                          child: const Padding(
-                            padding: EdgeInsets.all(6.0),
-                            child: Icon(
+                      // Nút tròn Add To Cart với vùng chạm tối thiểu 48x48
+                      InkWell(
+                        onTap: onAddToCart,
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
                               Icons.add_shopping_cart_rounded,
                               size: 16,
                               color: Colors.white,

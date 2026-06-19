@@ -21,4 +21,17 @@ class GetProductsUseCase {
   Future<void> deleteProduct(String id) {
     return repository.deleteProduct(id);
   }
+
+  // product with cart 
+  Future<void> addProductToCart(Product product) {
+    return repository.addProductToCart(product);
+  }
+
+  Future<List<Product>> getProductsCart() {
+    return repository.getProductsCart();
+  }
+
+  Future<void> removeProductFromCart(String id) {
+    return repository.removeProductFromCart(id);
+  }
 }
