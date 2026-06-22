@@ -8,6 +8,10 @@ Dự án Flutter quản lý sản phẩm và giỏ hàng, áp dụng **Clean Arc
 </p>
 
 
+https://github.com/user-attachments/assets/ff167219-0f16-45b0-b14d-0036a029c00b
+
+
+
 
 ---
 
