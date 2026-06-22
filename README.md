@@ -2,6 +2,13 @@
 
 Dự án Flutter quản lý sản phẩm và giỏ hàng, áp dụng **Clean Architecture** kết hợp với quản lý trạng thái **GetX**, tích hợp kết nối **RESTful API** và lưu trữ dữ liệu cục bộ bằng **Hive**.
 
+## Demo 
+<p align="center">
+  <video src="[https://github.com/user-attachments/assets/9cbb279e-8226-41c2-947f-fb01a2af2150](https://github.com/user-attachments/assets/7dda84ef-77de-4a7e-bc96-f8b25a3d7366)" width="400" controls></video>
+</p>
+
+
+
 ---
 
 ## 🚀 Tính Năng Chính
