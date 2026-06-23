@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/AppTheme.dart';
 import '../../../../core/values/app_strings.dart';
+import '../../../../domain/entities/product.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_state_widget.dart';
 import '../controller/cart_controller.dart';
 
 class CartView extends GetView<CartController> {
@@ -21,116 +23,7 @@ class CartView extends GetView<CartController> {
 
         return Column(
           children: [
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.productsCart.length,
-                itemBuilder: (context, index) {
-                  final product = controller.productsCart[index];
-
-                  // Thêm hiệu ứng Swipe Action (Xóa bằng cách vuốt) theo đặc tả DESIGN.md
-                  return Dismissible(
-                    key: Key(product.id),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20),
-                      decoration: BoxDecoration(
-                        color: AppTheme.errorColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                    onDismissed: (_) {
-                      controller.removeFromCart(product);
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFEDF2F7), width: 1.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          // Ảnh sản phẩm nhỏ
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              product.imageUrl,
-                              width: 64,
-                              height: 64,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-
-                          // Tên, SKU và giá
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  product.title,
-                                  style: const TextStyle(
-                                    fontFamily: AppTheme.fontFamily,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'SKU: ${product.sku}',
-                                  style: const TextStyle(
-                                    fontFamily: AppTheme.fontFamily,
-                                    fontSize: 11,
-                                    color: AppTheme.neutralColor,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  '\$${product.price.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontFamily: AppTheme.fontFamily,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppTheme.primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Nút xóa sản phẩm khỏi giỏ hàng
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline_rounded,
-                              color: AppTheme.errorColor,
-                              size: 22,
-                            ),
-                            onPressed: () => controller.removeFromCart(product),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            _buildCartList(),
             _buildSummarySection(),
           ],
         );
@@ -138,39 +31,128 @@ class CartView extends GetView<CartController> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildCartList() {
+    return Expanded(
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: controller.productsCart.length,
+        itemBuilder: (context, index) {
+          final product = controller.productsCart[index];
+          return _buildCartItem(product);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCartItem(Product product) {
+    // Thêm hiệu ứng Swipe Action (Xóa bằng cách vuốt) theo đặc tả DESIGN.md
+    return Dismissible(
+      key: Key(product.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: AppTheme.errorColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.delete_outline_rounded,
+          color: Colors.white,
+          size: 28,
+        ),
+      ),
+      onDismissed: (_) {
+        controller.removeFromCart(product);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFEDF2F7), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.shopping_bag_outlined,
-                size: 64,
-                color: AppTheme.primaryColor,
+            // Ảnh sản phẩm nhỏ
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                product.imageUrl,
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              AppStrings.cartEmpty,
-              style: TextStyle(
-                fontFamily: AppTheme.fontFamily,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.onSurface,
+            const SizedBox(width: 16),
+
+            // Tên, SKU và giá
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.title,
+                    style: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'SKU: ${product.sku}',
+                    style: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      fontSize: 11,
+                      color: AppTheme.neutralColor,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '\$${product.price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
+            ),
+
+            // Nút xóa sản phẩm khỏi giỏ hàng
+            IconButton(
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppTheme.errorColor,
+                size: 22,
+              ),
+              onPressed: () => controller.removeFromCart(product),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return const CustomStateWidget(
+      icon: Icons.shopping_bag_outlined,
+      useIconBackground: true,
+      message: AppStrings.cartEmpty,
+      messageFontSize: 18.0,
     );
   }
 
