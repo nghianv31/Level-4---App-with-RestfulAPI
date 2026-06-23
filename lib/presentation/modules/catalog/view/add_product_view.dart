@@ -45,12 +45,12 @@ class _AddProductViewState extends State<AddProductView> {
     super.initState();
     
     // Khởi tạo các controller theo chế độ tương ứng
-    _titleController = TextEditingController(text: _isEdit ? widget.product!.title : '');
-    _priceController = TextEditingController(text: _isEdit ? widget.product!.price.toString() : '');
-    _skuController = TextEditingController(text: _isEdit ? widget.product!.sku : '');
-    _categoryController = TextEditingController(text: _isEdit ? widget.product!.category : '');
-    _imageUrlController = TextEditingController(text: _isEdit ? widget.product!.imageUrl : '');
-    _descriptionController = TextEditingController(text: _isEdit ? widget.product!.description : '');
+    _titleController = TextEditingController(text: _isEdit ? (widget.product?.title ?? '') : '');
+    _priceController = TextEditingController(text: _isEdit ? (widget.product?.price.toString() ?? '') : '');
+    _skuController = TextEditingController(text: _isEdit ? (widget.product?.sku ?? '') : '');
+    _categoryController = TextEditingController(text: _isEdit ? (widget.product?.category ?? '') : '');
+    _imageUrlController = TextEditingController(text: _isEdit ? (widget.product?.imageUrl ?? '') : '');
+    _descriptionController = TextEditingController(text: _isEdit ? (widget.product?.description ?? '') : '');
 
     // Lắng nghe biến errorMessage từ catalogController để hiển thị dialog khi có lỗi
     _errorWorker = ever(catalogController.errorMessage, (String message) {
@@ -132,7 +132,7 @@ class _AddProductViewState extends State<AddProductView> {
   }
 
   void _submitProduct() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isSaving = true);
       catalogController.errorMessage.value = '';
 
@@ -144,15 +144,15 @@ class _AddProductViewState extends State<AddProductView> {
 
       final submittedProduct = ProductModel(
         id: _isEdit
-            ? widget.product!.id
+            ? (widget.product?.id ?? 'p_edit_${DateTime.now().millisecondsSinceEpoch}')
             : 'p_new_${DateTime.now().millisecondsSinceEpoch}',
         title: _titleController.text.trim(),
         price: double.parse(_priceController.text.trim()),
         description: _descriptionController.text.trim(),
         imageUrl: enteredImageUrl.isNotEmpty
             ? enteredImageUrl
-            : (_isEdit ? widget.product!.imageUrl : randomImage),
-        rating: _isEdit ? widget.product!.rating : 0.0,
+            : (_isEdit ? (widget.product?.imageUrl ?? randomImage) : randomImage),
+        rating: _isEdit ? (widget.product?.rating ?? 0.0) : 0.0,
         category: _categoryController.text.trim().toUpperCase(),
         sku: _skuController.text.trim().toUpperCase(),
       );

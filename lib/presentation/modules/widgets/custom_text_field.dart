@@ -36,7 +36,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   void _validate(String value) {
     if (widget.validator == null) return;
-    final error = widget.validator!(value);
+    final error = widget.validator?.call(value);
     setState(() {
       _errorText = error;
       _isValid = error == null && (_isDirty || value.isNotEmpty);
@@ -81,7 +81,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               if (mounted) {
                 setState(() {
                   _errorText = error;
-                  _isValid = error == null && value!.isNotEmpty;
+                  _isValid = error == null && (value?.isNotEmpty ?? false);
                 });
               }
             });

@@ -24,8 +24,8 @@ class ProductSkeleton extends StatelessWidget {
         children: [
           Expanded(
             child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -40,8 +40,8 @@ class ProductSkeleton extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
                   child: Container(
                     width: 60,
                     height: 14,
@@ -53,8 +53,8 @@ class ProductSkeleton extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
                   child: Container(
                     width: double.infinity,
                     height: 16,
@@ -63,8 +63,8 @@ class ProductSkeleton extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
                   child: Container(
                     width: 40,
                     height: 14,
@@ -76,8 +76,8 @@ class ProductSkeleton extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
+                      baseColor: Colors.grey.shade300,
+                      highlightColor: Colors.grey.shade100,
                       child: Container(
                         width: 60,
                         height: 20,
@@ -85,8 +85,8 @@ class ProductSkeleton extends StatelessWidget {
                       ),
                     ),
                     Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
+                      baseColor: Colors.grey.shade300,
+                      highlightColor: Colors.grey.shade100,
                       child: Container(
                         width: 32,
                         height: 32,

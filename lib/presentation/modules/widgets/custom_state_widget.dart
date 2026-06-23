@@ -21,6 +21,7 @@ class CustomStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final btn = actionButton;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -49,9 +50,9 @@ class CustomStateWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            if (actionButton != null) ...[
+            if (btn != null) ...[
               const SizedBox(height: 16),
-              actionButton!,
+              btn,
             ],
           ],
         ),
