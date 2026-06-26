@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import '../../data/datasources/local/hiveCartProducts.dart';
 import '../../data/datasources/local/hiveToken.dart';
-import '../../data/datasources/local/hiveSettings.dart';
 import '../../data/datasources/remote/dio_client.dart';
 import '../../data/datasources/remote/product_remote_data_source.dart';
 import '../../data/repositories/product_repository_impl.dart';
@@ -47,8 +46,5 @@ class InitialBinding extends Bindings {
     
     // Đăng ký HiveToken toàn cục
     Get.put<HiveToken>(HiveToken(), permanent: true);
-
-    // Đăng ký HiveSettings toàn cục
-    Get.put<HiveSettings>(HiveSettings(), permanent: true);
   }
 }

@@ -18,7 +18,7 @@ class AuthRemoteDataSourcesImpl implements AuthRemoteDataSources {
       '/login',
       data: {'username': username, 'password': password},
     );
-    return AuthToken.fromJson(response.data['data']);
+    return AuthToken.fromJson(response.data);
   }
 
   @override

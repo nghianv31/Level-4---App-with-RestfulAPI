@@ -5,6 +5,7 @@ import '../../../../core/values/app_strings.dart';
 import '../../../../domain/entities/product.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_state_widget.dart';
+import '../../widgets/custom_cached_image.dart';
 import '../controller/cart_controller.dart';
 
 class CartView extends GetView<CartController> {
@@ -85,11 +86,12 @@ class CartView extends GetView<CartController> {
             // Ảnh sản phẩm nhỏ
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                product.imageUrl,
+              child: CustomCachedImage(
+                imageUrl: product.imageUrl,
                 width: 64,
                 height: 64,
                 fit: BoxFit.cover,
+                errorIconSize: 24.0,
               ),
             ),
             const SizedBox(width: 16),

@@ -3,18 +3,8 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 
 import 'auth_interceptor.dart';
-
-/// ApiException carries the server status code and the response data (usually JSON)
-/// so callers can read fields like `error` or `message`.
-class ApiException implements Exception {
-  final int? statusCode;
-  final dynamic data;
-
-  ApiException(this.statusCode, this.data);
-
-  @override
-  String toString() => 'ApiException(statusCode: $statusCode, data: $data)';
-}
+import '../../../core/exceptions/api_exception.dart';
+import '../../models/response.dart';
 
 class ApiService {
   final Dio _dio;
@@ -26,7 +16,7 @@ class ApiService {
   }
 
   ApiService._internal() : _dio = Dio() {
-    _dio.options.baseUrl = 'http://10.0.2.2:1997/api/v1';
+    _dio.options.baseUrl = 'https://sds-demo-bd5f993d8e1a.herokuapp.com';
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
     _dio.interceptors.add(AuthInterceptor());
@@ -40,60 +30,64 @@ class ApiService {
     }
   }
 
-  Future<Response> post(String path, {dynamic data}) async {
+  Future<SuccessResponse> post(String path, {dynamic data}) async {
     try {
       // Don't set Content-Type when sending FormData, let Dio handle it
       final options = data is FormData
           ? Options()
           : Options(headers: {'Content-Type': 'application/json'});
-      return await _dio.post(path, data: data, options: options);
+      final response = await _dio.post(path, data: data, options: options);
+      return SuccessResponse.fromJson(response.data);
     } on DioException catch (e) {
       // If server provided structured JSON, throw ApiException with that data
       final resp = e.response;
       log('API error [${resp?.statusCode}]: ${resp?.data}');
       if (resp != null && resp.data != null) {
-        throw ApiException(resp.statusCode, resp.data);
+        throw ApiException.fromResponse(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
     }
   }
 
-  Future<Response> get(
+  Future<SuccessResponse> get(
     String path, {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      return await _dio.get(path, queryParameters: queryParameters);
+      final response = await _dio.get(path, queryParameters: queryParameters);
+      return SuccessResponse.fromJson(response.data);
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
         log('API error [${resp.statusCode}]: ${resp.data}');
-        throw ApiException(resp.statusCode, resp.data);
+        throw ApiException.fromResponse(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
     }
   }
 
-  Future<Response> put(String path, {dynamic data}) async {
+  Future<SuccessResponse> put(String path, {dynamic data}) async {
     try {
-      return await _dio.put(path, data: data);
+      final response = await _dio.put(path, data: data);
+      return SuccessResponse.fromJson(response.data);
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
         log('API error [${resp.statusCode}]: ${resp.data}');
-        throw ApiException(resp.statusCode, resp.data);
+        throw ApiException.fromResponse(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
     }
   }
 
-  Future<Response> delete(String path, {dynamic data}) async {
+  Future<SuccessResponse> delete(String path, {dynamic data}) async {
     try {
-      return await _dio.delete(path, data: data);
+      final response = await _dio.delete(path, data: data);
+      return SuccessResponse.fromJson(response.data);
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        throw ApiException(resp.statusCode, resp.data);
+        throw ApiException.fromResponse(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
     }
@@ -127,7 +121,7 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        throw ApiException(resp.statusCode, resp.data);
+        throw ApiException.fromResponse(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
     }

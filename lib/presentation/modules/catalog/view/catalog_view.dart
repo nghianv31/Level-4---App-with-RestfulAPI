@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/AppTheme.dart';
 import '../../../../core/values/app_strings.dart';
-import '../../../../data/datasources/local/hiveSettings.dart';
+import '../../../../data/datasources/local/setting_box.dart';
 import '../../../../data/datasources/local/hiveToken.dart';
-import '../../../routes/app_pages.dart';
+import '../../../../core/routes/app_pages.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_skeleton.dart';
 import '../../widgets/custom_state_widget.dart';
@@ -83,7 +83,7 @@ class CatalogView extends GetView<CatalogController> {
         IconButton(
           icon: const Icon(Icons.logout_rounded),
           onPressed: () {
-            Get.find<HiveSettings>().saveStatusLogin(false);
+            SettingBox.loginStatus = false;
             Get.find<HiveToken>().saveToken('');
             Get.offAllNamed(Routes.login);
           },

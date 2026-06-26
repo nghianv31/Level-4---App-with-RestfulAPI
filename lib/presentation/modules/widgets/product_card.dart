@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/AppTheme.dart';
 import '../../../domain/entities/product.dart';
+import 'custom_cached_image.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -39,21 +40,10 @@ class ProductCard extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
-                child: Image.network(
-                  product.imageUrl,
+                child: CustomCachedImage(
+                  imageUrl: product.imageUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      color: const Color(0xFFF7FAFC),
-                      child: const Icon(
-                        Icons.image_not_supported_rounded,
-                        color: AppTheme.neutralColor,
-                        size: 40,
-                      ),
-                    );
-                  },
+                  errorIconSize: 40.0,
                 ),
               ),
             ),

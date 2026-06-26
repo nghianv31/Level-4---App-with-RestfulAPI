@@ -4,6 +4,7 @@ import '../../../../core/theme/AppTheme.dart';
 import '../../../../core/values/app_strings.dart';
 import '../../../../domain/entities/product.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_cached_image.dart';
 import '../../cart/controller/cart_controller.dart';
 import '../controller/catalog_controller.dart';
 import 'add_product_view.dart';
@@ -158,19 +159,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'product_${currentProduct.id}',
-          child: Image.network(
-            currentProduct.imageUrl,
+          child: CustomCachedImage(
+            imageUrl: currentProduct.imageUrl,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: const Color(0xFFF7FAFC),
-                child: const Icon(
-                  Icons.image_not_supported_rounded,
-                  color: AppTheme.neutralColor,
-                  size: 80,
-                ),
-              );
-            },
+            errorIconSize: 80.0,
           ),
         ),
       ),

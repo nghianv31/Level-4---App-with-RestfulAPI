@@ -2,16 +2,14 @@ import 'package:api_demo/data/datasources/remote/dio_client.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'core/theme/AppTheme.dart';
-import 'data/datasources/local/hiveSettings.dart';
 import 'data/datasources/local/hiveToken.dart';
 import 'data/datasources/local/local_database_service.dart';
 import 'presentation/bindings/initial_binding.dart';
-import 'presentation/routes/app_pages.dart';
+import 'core/routes/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => LocalDatabaseService().init());
-  Get.put<HiveSettings>(HiveSettings(), permanent: true);
   final hiveToken = Get.put<HiveToken>(HiveToken(), permanent: true);
 
   // NẠP TOKEN VÀO API SERVICE KHI MỞ LẠI APP

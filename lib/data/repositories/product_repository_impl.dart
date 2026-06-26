@@ -1,5 +1,5 @@
 import 'package:api_demo/core/values/app_strings.dart';
-import 'package:api_demo/data/datasources/remote/dio_client.dart';
+import 'package:api_demo/core/exceptions/api_exception.dart';
 import 'package:api_demo/data/models/product_model.dart';
 
 import '../../domain/entities/product.dart';

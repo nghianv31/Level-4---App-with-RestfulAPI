@@ -19,7 +19,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       '/products',
       queryParameters: {'page': page, 'limit': 10},
     );
-    return (response.data['data'] as List)
+    return (response.data as List)
         .map((json) => ProductModel.fromJson(json))
         .toList();
   }

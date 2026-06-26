@@ -1,82 +1,185 @@
-import 'package:api_demo/domain/usecases/auth_usecase.dart';
+import 'dart:async';
+import 'package:api_demo/core/exceptions/api_exception.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../../../routes/app_pages.dart';
+import '../../../../core/routes/app_pages.dart';
+import '../../../../core/values/app_strings.dart';
+import '../../../../data/datasources/local/setting_box.dart';
+import '../../../../domain/usecases/auth_usecase.dart';
+import '../view/error_dialog_widget.dart';
+import '../view/lock_dialog_widget.dart';
 
-class LoginController extends GetxController {
+class LoginController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   final AuthUsecase authUsecase;
-
   LoginController(this.authUsecase);
 
-  final formKey = GlobalKey<FormState>();
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
-
   final RxBool isLoading = false.obs;
-  final RxString errorMessage = ''.obs;
-  final RxBool isPasswordVisible = false.obs;
+  final RxString message = ''.obs;
+  final RxBool isShowPass = false.obs;
+
+  //lock state
+  final RxBool isLockLogin = false.obs;
+  final RxInt countdownSeconds = 0.obs;
+  Timer? _lockTimer;
+
+  late AnimationController shakeController;
+
+  
+  final TextEditingController accountController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  final FocusNode accountFocus = FocusNode();
+  final FocusNode passwordFocus = FocusNode();
+
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    shakeController = AnimationController(vsync: this);
+  }
+
+ 
+
+  @override
+  void onReady() {
+    super.onReady();
+    _checkLockState();
+  }
+
+  void _checkLockState() {
+    int remaining =
+        (SettingBox.lockUntil - DateTime.now().millisecondsSinceEpoch) ~/ 1000;
+    if (remaining > 0) {
+      countdownSeconds.value = remaining;
+      isLockLogin.value = true;
+      _startTimer();
+      showLockDialog();
+    } else {
+      _unlock();
+    }
+  }
+
+  void _startTimer() {
+    _lockTimer?.cancel();
+    _lockTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (countdownSeconds.value > 0) {
+        countdownSeconds.value--;
+      } else {
+        timer.cancel();
+        _unlock();
+      }
+    });
+  }
+
+  void _unlock() async {
+    SettingBox.countErrorLogin = 0;
+    SettingBox.lockUntil = 0;
+    isLockLogin.value = false;
+
+    if (SettingBox.lockedUserId.isNotEmpty) {
+      try {
+        SettingBox.lockedUserId =
+            ""; // Xóa bộ nhớ local sau khi unlock thành công
+      } catch (e) {
+        debugPrint("Lỗi unlock remote: $e");
+      }
+    }
+
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+  }
+
+  void showLockDialog() {
+    if (Get.isDialogOpen ?? false) return;
+    Get.dialog(const LockDialogWidget(), barrierDismissible: false);
+  }
 
   @override
   void onClose() {
-    usernameController.dispose();
+    _lockTimer?.cancel();
+    accountController.dispose();
     passwordController.dispose();
+    accountFocus.dispose();
+    passwordFocus.dispose();
+    shakeController.dispose();
+    super.onClose();
     super.onClose();
   }
 
-  String? validateUsername(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Tên đăng nhập không được để trống';
-    }
-    return null;
+  void toggleShowPass() {
+    isShowPass.value = !isShowPass.value;
   }
 
-  String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Mật khẩu không được để trống';
-    }
-    if (value.length < 6) {
-      return 'Mật khẩu phải chứa ít nhất 6 ký tự';
-    }
-    return null;
+  bool isTextFieldChange(TextEditingController controller) {
+    return controller.text.isNotEmpty;
   }
 
-  void togglePasswordVisibility() {
-    isPasswordVisible.value = !isPasswordVisible.value;
+  void onClickSuffixIcon(TextEditingController controller, bool isPassword) {
+    if (isPassword) {
+      toggleShowPass();
+    } else {
+      controller.clear();
+      update(); // trigger UI update for suffix icon
+    }
   }
 
-  Future<void> login() async {
-    if (formKey.currentState?.validate() ?? false) {
+  void handleLogin() async {
+    if (isLockLogin.value) {
+      showLockDialog();
+      return;
+    }
+
+    final formState = formKey.currentState;
+    if (formState != null && formState.validate()) {
       isLoading.value = true;
-
+      formState.save();
       try {
         await authUsecase.login(
-          usernameController.text,
+          accountController.text,
           passwordController.text,
         );
-
-        isLoading.value = false;
-
-        // Chuyển hướng thay thế hoàn toàn sang trang Catalog
+        SettingBox.countErrorLogin = 0; // Reset on success
         Get.offAllNamed(Routes.catalog);
-
-        Get.snackbar(
-          'Thành công',
-          'Đăng nhập thành công! Chào mừng quay trở lại.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF16A34A).withOpacity(0.9),
-          colorText: Colors.white,
-        );
-      } on Exception catch (e) {
+      } on ApiException catch (e) {
+        if (e.type == ApiExceptionType.locked) {
+          _checkLockState();
+        } else {
+          String displayMessage = '';
+          switch (e.type) {
+            case ApiExceptionType.invalidCredentials:
+              displayMessage = AppStrings.loginFailed;
+              SettingBox.countErrorLogin++;
+              if (SettingBox.countErrorLogin >= SettingBox.errorCountLock) {
+                SettingBox.lockUntil = DateTime.now().millisecondsSinceEpoch +
+                    (SettingBox.timeLock * 1000);
+                _checkLockState();
+              }
+              break;
+            default:
+              displayMessage = AppStrings.errorServer;
+          }
+          message.value = displayMessage;
+          Get.dialog(ErrorDialogWidget(message: message.value));
+        }
+        accountController.clear();
+        passwordController.clear();
+        update();
+      } catch (e) {
+        message.value = AppStrings.errorServer;
+        Get.dialog(ErrorDialogWidget(message: message.value));
+        update();
+      } finally {
         isLoading.value = false;
-        errorMessage.value = e.toString();
-        Get.snackbar(
-          'Lỗi',
-          errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.9),
-          colorText: Colors.white,
-        );
+        message.value = '';
       }
+    } else {
+      shakeController.forward(from: 0.0);
     }
+
+    TextInput.finishAutofillContext();
   }
 }
