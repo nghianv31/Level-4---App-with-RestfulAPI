@@ -8,6 +8,7 @@ import '../../../../core/routes/app_pages.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_skeleton.dart';
 import '../../widgets/custom_state_widget.dart';
+import '../../widgets/custom_snackbar.dart';
 import '../../cart/controller/cart_controller.dart';
 import '../controller/catalog_controller.dart';
 
@@ -39,7 +40,13 @@ class CatalogView extends GetView<CatalogController> {
 
   PreferredSizeWidget _buildAppBar(CartController cartController) {
     return AppBar(
-      title: const Text(AppStrings.appName),
+      title: const Text(
+        AppStrings.appName,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: AppTheme.primaryColor,
+        ),
+      ),
       actions: [
         // Nút Giỏ hàng góc trên bên phải kèm số lượng (Badge)
         Obx(() {
@@ -76,7 +83,17 @@ class CatalogView extends GetView<CatalogController> {
                   ),
               ],
             ),
-            onPressed: () => Get.toNamed(Routes.cart),
+            onPressed: () {
+              final bool isHaveError = controller.errorMessage.isNotEmpty;
+              if (!isHaveError) {
+                Get.toNamed(Routes.cart);
+              } else {
+                CustomSnackbar.showError(
+                  'Thông báo',
+                  'Không thể xem giỏ hàng khi có lỗi',
+                );
+              }
+            },
           );
         }),
         // Nút Đăng xuất đưa về màn hình Đăng nhập
@@ -97,10 +114,7 @@ class CatalogView extends GetView<CatalogController> {
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, // 2 cột
@@ -140,10 +154,7 @@ class CatalogView extends GetView<CatalogController> {
 
   Widget _buildProductGrid(CartController cartController) {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, // 2 cột
@@ -169,43 +180,54 @@ class CatalogView extends GetView<CatalogController> {
   }
 
   Widget _buildLoadingMoreIndicator() {
-    return SliverToBoxAdapter(
-      child: controller.isLoadingMore.value
-          ? const Padding(
-              padding: EdgeInsets.only(bottom: 24.0, top: 8.0),
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: AppTheme.primaryColor,
+    return Obx(() {
+      return controller.isLoadingMore.value
+          ? SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.58,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => const ProductSkeleton(),
+                  childCount: 2,
                 ),
               ),
             )
-          : const SizedBox.shrink(),
-    );
+          : const SliverToBoxAdapter(child: SizedBox.shrink());
+    });
   }
 
   Widget _buildFloatingActionButton() {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 8), // Bóng mờ cao Level 3
-          ),
-        ],
-      ),
-      child: FloatingActionButton(
-        onPressed: () {
-          Get.toNamed(Routes.addProduct);
-        },
-        backgroundColor: AppTheme.primaryColor,
-        elevation: 0,
-        highlightElevation: 0,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+    final bool isHaveError = controller.errorMessage.isNotEmpty;
+    return Visibility(
+      visible: !isHaveError,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryColor.withOpacity(0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 8), // Bóng mờ cao Level 3
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            Get.toNamed(Routes.addProduct);
+          },
+          backgroundColor: AppTheme.primaryColor,
+          elevation: 0,
+          highlightElevation: 0,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+        ),
       ),
     );
   }

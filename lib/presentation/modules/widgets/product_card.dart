@@ -39,7 +39,9 @@ class ProductCard extends StatelessWidget {
             // Ảnh sản phẩm tự động co giãn theo không gian trống để tránh overflow
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(11),
+                ),
                 child: CustomCachedImage(
                   imageUrl: product.imageUrl,
                   fit: BoxFit.cover,
@@ -55,24 +57,24 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Danh mục với font chữ 6px radius tag
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(6), // 6px radius cho tag
-                    ),
-                    child: Text(
-                      product.category.toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontFamily,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                        color: AppTheme.primaryColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
+                  // Container(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  //   decoration: BoxDecoration(
+                  //     color: AppTheme.primaryColor.withOpacity(0.08),
+                  //     borderRadius: BorderRadius.circular(6), // 6px radius cho tag
+                  //   ),
+                  //   child: Text(
+                  //     product.category.toUpperCase(),
+                  //     style: const TextStyle(
+                  //       fontFamily: AppTheme.fontFamily,
+                  //       fontSize: 9,
+                  //       fontWeight: FontWeight.bold,
+                  //       letterSpacing: 0.5,
+                  //       color: AppTheme.primaryColor,
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 6),
 
                   // Tiêu đề sản phẩm
                   Text(
@@ -89,26 +91,27 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   // Đánh giá sao
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        color: AppTheme.tertiaryColor, // Màu vàng hổ phách của thiết kế
-                        size: 14,
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        product.rating.toString(),
-                        style: const TextStyle(
-                          fontFamily: AppTheme.fontFamily,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  // Row(
+                  //   children: [
+                  //     const Icon(
+                  //       Icons.star_rounded,
+                  //       color: AppTheme
+                  //           .tertiaryColor, // Màu vàng hổ phách của thiết kế
+                  //       size: 14,
+                  //     ),
+                  //     const SizedBox(width: 2),
+                  //     Text(
+                  //       product.rating.toString(),
+                  //       style: const TextStyle(
+                  //         fontFamily: AppTheme.fontFamily,
+                  //         fontSize: 11,
+                  //         fontWeight: FontWeight.bold,
+                  //         color: AppTheme.onSurface,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: 8),
 
                   // Dòng chân thẻ: Giá tiền và Nút Thêm vào giỏ
                   Row(
@@ -123,7 +126,7 @@ class ProductCard extends StatelessWidget {
                           color: AppTheme.primaryColor,
                         ),
                       ),
-                      
+
                       // Nút tròn Add To Cart với vùng chạm tối thiểu 48x48
                       InkWell(
                         onTap: onAddToCart,

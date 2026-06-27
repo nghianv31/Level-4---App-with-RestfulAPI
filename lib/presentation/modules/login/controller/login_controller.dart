@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:api_demo/core/exceptions/api_exception.dart';
+import 'package:api_demo/core/exceptions/string_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../core/routes/app_pages.dart';
-import '../../../../core/values/app_strings.dart';
 import '../../../../data/datasources/local/setting_box.dart';
 import '../../../../domain/usecases/auth_usecase.dart';
 import '../view/error_dialog_widget.dart';
@@ -148,19 +148,14 @@ class LoginController extends GetxController
         if (e.type == ApiExceptionType.locked) {
           _checkLockState();
         } else {
-          String displayMessage = '';
-          switch (e.type) {
-            case ApiExceptionType.invalidCredentials:
-              displayMessage = AppStrings.loginFailed;
-              SettingBox.countErrorLogin++;
-              if (SettingBox.countErrorLogin >= SettingBox.errorCountLock) {
-                SettingBox.lockUntil = DateTime.now().millisecondsSinceEpoch +
-                    (SettingBox.timeLock * 1000);
-                _checkLockState();
-              }
-              break;
-            default:
-              displayMessage = AppStrings.errorServer;
+          final displayMessage = StringException.messageException(e.type);
+          if (e.type == ApiExceptionType.invalidCredentials) {
+            SettingBox.countErrorLogin++;
+            if (SettingBox.countErrorLogin >= SettingBox.errorCountLock) {
+              SettingBox.lockUntil = DateTime.now().millisecondsSinceEpoch +
+                  (SettingBox.timeLock * 1000);
+              _checkLockState();
+            }
           }
           message.value = displayMessage;
           Get.dialog(ErrorDialogWidget(message: message.value));
@@ -169,7 +164,7 @@ class LoginController extends GetxController
         passwordController.clear();
         update();
       } catch (e) {
-        message.value = AppStrings.errorServer;
+        message.value = StringException.removeException(e.toString());
         Get.dialog(ErrorDialogWidget(message: message.value));
         update();
       } finally {

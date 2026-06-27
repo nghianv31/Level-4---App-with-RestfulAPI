@@ -6,6 +6,7 @@ import '../../../../domain/entities/product.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_cached_image.dart';
 import '../../cart/controller/cart_controller.dart';
+import '../../widgets/custom_snackbar.dart';
 import '../controller/catalog_controller.dart';
 import 'add_product_view.dart';
 
@@ -25,17 +26,22 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     currentProduct = Get.arguments as Product;
   }
 
-  void _confirmDelete(BuildContext context, CatalogController catalogController) {
+  void _confirmDelete(
+    BuildContext context,
+    CatalogController catalogController,
+  ) {
     Get.defaultDialog(
       title: 'Xóa sản phẩm',
-      middleText: 'Bạn có chắc chắn muốn xóa sản phẩm "${currentProduct.title}" không?',
+      middleText:
+          'Bạn có chắc chắn muốn xóa sản phẩm "${currentProduct.title}" không?',
       textCancel: 'Hủy',
       textConfirm: 'Xóa',
       confirmTextColor: Colors.white,
+      cancelTextColor: Colors.redAccent,
       buttonColor: AppTheme.errorColor,
       onConfirm: () async {
         Get.back(); // Đóng dialog xác nhận
-        
+
         // Hiển thị loading dialog
         Get.dialog(
           const Center(
@@ -48,22 +54,16 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           await catalogController.deleteProduct(currentProduct.id);
           Get.back(); // Đóng loading dialog
           Get.back(); // Quay lại trang catalog
-          
-          Get.snackbar(
+
+          CustomSnackbar.showSuccess(
             'Thành công',
             'Đã xóa sản phẩm thành công!',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: const Color(0xFF16A34A).withOpacity(0.9),
-            colorText: Colors.white,
           );
         } catch (e) {
           Get.back(); // Đóng loading dialog
-          Get.snackbar(
+          CustomSnackbar.showError(
             'Lỗi',
             e.toString().replaceFirst('Exception: ', ''),
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppTheme.errorColor.withOpacity(0.9),
-            colorText: Colors.white,
           );
         }
       },
@@ -76,24 +76,29 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     final catalogController = Get.find<CatalogController>();
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Nội dung cuộn với SliverAppBar
-          CustomScrollView(
-            slivers: [
-              _buildSliverAppBar(context, catalogController),
-              _buildProductDetails(),
-            ],
-          ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Nội dung cuộn với SliverAppBar
+            CustomScrollView(
+              slivers: [
+                _buildSliverAppBar(context, catalogController),
+                _buildProductDetails(),
+              ],
+            ),
 
-          // Nút bấm dán cố định dưới màn hình (Sticky Bottom Action Bar)
-          _buildBottomActionBar(cartController),
-        ],
+            // Nút bấm dán cố định dưới màn hình (Sticky Bottom Action Bar)
+            _buildBottomActionBar(cartController),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, CatalogController catalogController) {
+  Widget _buildSliverAppBar(
+    BuildContext context,
+    CatalogController catalogController,
+  ) {
     return SliverAppBar(
       expandedHeight: 320,
       pinned: true,
@@ -106,10 +111,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           shape: BoxShape.circle,
         ),
         child: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: AppTheme.onSurface,
-          ),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppTheme.onSurface),
           onPressed: () => Get.back(),
         ),
       ),
@@ -161,7 +163,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           tag: 'product_${currentProduct.id}',
           child: CustomCachedImage(
             imageUrl: currentProduct.imageUrl,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             errorIconSize: 80.0,
           ),
         ),
@@ -232,35 +234,35 @@ class _ProductDetailViewState extends State<ProductDetailView> {
             const SizedBox(height: 12),
 
             // Đánh giá sao
-            Row(
-              children: [
-                const Icon(
-                  Icons.star_rounded,
-                  color: AppTheme.tertiaryColor,
-                  size: 18,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  currentProduct.rating.toString(),
-                  style: const TextStyle(
-                    fontFamily: AppTheme.fontFamily,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.onSurface,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                const Text(
-                  '(120 lượt đánh giá)',
-                  style: TextStyle(
-                    fontFamily: AppTheme.fontFamily,
-                    fontSize: 12,
-                    color: AppTheme.neutralColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+            // Row(
+            //   children: [
+            //     const Icon(
+            //       Icons.star_rounded,
+            //       color: AppTheme.tertiaryColor,
+            //       size: 18,
+            //     ),
+            //     const SizedBox(width: 4),
+            //     Text(
+            //       currentProduct.rating.toString(),
+            //       style: const TextStyle(
+            //         fontFamily: AppTheme.fontFamily,
+            //         fontSize: 14,
+            //         fontWeight: FontWeight.bold,
+            //         color: AppTheme.onSurface,
+            //       ),
+            //     ),
+            //     const SizedBox(width: 6),
+            //     const Text(
+            //       '(120 lượt đánh giá)',
+            //       style: TextStyle(
+            //         fontFamily: AppTheme.fontFamily,
+            //         fontSize: 12,
+            //         color: AppTheme.neutralColor,
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(height: 24),
 
             // Tiêu đề Mô tả
             const Text(
@@ -299,9 +301,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),

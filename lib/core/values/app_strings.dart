@@ -48,4 +48,14 @@ class AppStrings {
   static const String lockLogin =
       "Tài khoản của bạn đã bị tạm khoá trong 5 phút do nhập sai nhiều lần.";
 
+  // Exception strings
+  static const String jsonParsingError = 'Yêu cầu không hợp lệ';
+  static const String usernameValidationError = 'Tên tài khoản không hợp lệ';
+  static const String validationError = 'Lỗi xác thực dữ liệu';
+  static const String conflictError = 'Dữ liệu đã tồn tại';
+  static const String referenceError = 'Dữ liệu không tồn tại';
+  static const String missingHeader = 'Thiếu thông tin xác thực';
+  static const String invalidHeaderFormat = 'Định dạng thông tin xác thực không hợp lệ';
+  static const String resourceNotFound = 'Không tìm thấy tài nguyên';
+  static const String unknown = 'Lỗi không xác định';
 }

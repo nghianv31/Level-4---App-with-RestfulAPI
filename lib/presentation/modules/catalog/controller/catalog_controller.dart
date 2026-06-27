@@ -1,5 +1,7 @@
+import 'package:api_demo/core/exceptions/string_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../core/exceptions/api_exception.dart';
 import '../../../../domain/entities/product.dart';
 import '../../../../domain/usecases/products_usecase.dart';
 
@@ -48,10 +50,21 @@ class CatalogController extends GetxController {
     errorMessage.value = '';
 
     try {
+      await Future.delayed(const Duration(milliseconds: 200));
       final fetched = await _getProductsUseCase.loadProducts(currentPage.value);
       products.assignAll(fetched);
+    } on ApiException catch (e) {
+      final ex = StringException.messageException(e.type);
+      errorMessage.value = ex;
+      if (isRefresh || e.type == ApiExceptionType.invalidOrExpiredToken) {
+        products.clear();
+      }
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      final ex = StringException.removeException(e.toString());
+      errorMessage.value = ex;
+      if (isRefresh) {
+        products.clear();
+      }
     } finally {
       isLoading.value = false;
     }
@@ -61,15 +74,24 @@ class CatalogController extends GetxController {
     isLoadingMore.value = true;
     try {
       currentPage.value++;
+      await Future.delayed(const Duration(milliseconds: 500));
       final fetched = await _getProductsUseCase.loadProducts(currentPage.value);
       if (fetched.isNotEmpty) {
         products.addAll(fetched);
       } else {
         currentPage.value--; // Thu hồi số trang nếu không còn dữ liệu
       }
+    } on ApiException catch (e) {
+      currentPage.value--;
+      final ex = StringException.messageException(e.type);
+      errorMessage.value = ex;
+      if (e.type == ApiExceptionType.invalidOrExpiredToken) {
+        products.clear();
+      }
     } catch (e) {
       currentPage.value--;
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      final ex = StringException.removeException(e.toString());
+      errorMessage.value = ex;
     } finally {
       isLoadingMore.value = false;
     }

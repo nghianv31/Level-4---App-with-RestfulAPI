@@ -22,14 +22,13 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final models = await remoteDataSource.getProducts(page);
       return models.map((m) => m.toEntity()).toList();
-    } on ApiException catch (e) {
-      if (e.statusCode == 401) {
-        throw Exception(AppStrings.loginAgain);
-      } else {
-        throw Exception(AppStrings.networkError);
-      }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception(AppStrings.networkError);
+      throw ApiException(
+        errorText: AppStrings.networkError,
+        type: ApiExceptionType.serverError,
+      );
     }
   }
 
@@ -38,14 +37,13 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final productModel = ProductModel.fromEntity(product);
       await remoteDataSource.addProduct(productModel);
-    } on ApiException catch (e) {
-      if (e.statusCode == 401) {
-        throw Exception(AppStrings.loginAgain);
-      } else {
-        throw Exception(AppStrings.networkError);
-      }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception(AppStrings.networkError);
+      throw ApiException(
+        errorText: AppStrings.networkError,
+        type: ApiExceptionType.serverError,
+      );
     }
   }
 
@@ -54,14 +52,13 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final productModel = ProductModel.fromEntity(product);
       await remoteDataSource.updateProduct(productModel);
-    } on ApiException catch (e) {
-      if (e.statusCode == 401) {
-        throw Exception(AppStrings.loginAgain);
-      } else {
-        throw Exception(AppStrings.networkError);
-      }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception(AppStrings.networkError);
+      throw ApiException(
+        errorText: AppStrings.networkError,
+        type: ApiExceptionType.serverError,
+      );
     }
   }
 
@@ -69,14 +66,13 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> deleteProduct(String id) async {
     try {
       await remoteDataSource.deleteProduct(id);
-    } on ApiException catch (e) {
-      if (e.statusCode == 401) {
-        throw Exception(AppStrings.loginAgain);
-      } else {
-        throw Exception(AppStrings.networkError);
-      }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception(AppStrings.networkError);
+      throw ApiException(
+        errorText: AppStrings.networkError,
+        type: ApiExceptionType.serverError,
+      );
     }
   }
 
@@ -97,14 +93,8 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final models = hiveCartProducts.getProductsCart();
       return models.map((m) => m.toEntity()).toList();
-    } on ApiException catch (e) {
-      if (e.statusCode == 401) {
-        throw Exception(AppStrings.loginAgain);
-      } else {
-        throw Exception(AppStrings.networkError);
-      }
     } catch (e) {
-      throw Exception(AppStrings.networkError);
+      throw Exception(e.toString());
     }
   }
 
@@ -112,14 +102,8 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> removeProductFromCart(String id) async {
     try {
       await hiveCartProducts.removeProductFromCart(id);
-    } on ApiException catch (e) {
-      if (e.statusCode == 401) {
-        throw Exception(AppStrings.loginAgain);
-      } else {
-        throw Exception(AppStrings.networkError);
-      }
     } catch (e) {
-      throw Exception(AppStrings.networkError);
+      throw Exception(e.toString());
     }
   }
 }

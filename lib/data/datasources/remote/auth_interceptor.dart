@@ -9,7 +9,7 @@ class AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Check if token expired (403 status OR error field contains "token_expired")
     final isTokenExpired =
-        err.response?.statusCode == 403 ||
+        err.response?.statusCode == 401 ||
         (err.response?.data is Map &&
             (err.response?.data['error'] == 'token_expired' ||
                 err.response?.data['message']?.toString().contains('hết hạn') ==

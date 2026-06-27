@@ -33,7 +33,10 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     } catch (e) {
       // Lỗi kết nối mạng (Connection refused, Timeout...)
-      throw Exception(AppStrings.networkError);
+      throw ApiException(
+        errorText: AppStrings.networkError,
+        type: ApiExceptionType.serverError,
+      );
     }
   }
 

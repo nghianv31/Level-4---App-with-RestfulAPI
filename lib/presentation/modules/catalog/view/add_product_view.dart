@@ -5,6 +5,7 @@ import '../../../../data/models/product_model.dart';
 import '../../../../domain/entities/product.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/custom_snackbar.dart';
 import '../controller/catalog_controller.dart';
 
 class AddProductView extends StatefulWidget {
@@ -174,14 +175,11 @@ class _AddProductViewState extends State<AddProductView> {
       if (catalogController.errorMessage.isEmpty) {
         Get.back(result: submittedProduct); // Trả về sản phẩm để cập nhật màn chi tiết (nếu ở chế độ Edit)
 
-        Get.snackbar(
+        CustomSnackbar.showSuccess(
           'Thành công',
           _isEdit
               ? 'Đã cập nhật thông tin sản phẩm thành công!'
               : 'Đã thêm sản phẩm "${submittedProduct.title}" thành công!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF16A34A).withOpacity(0.9),
-          colorText: Colors.white,
         );
       }
     }

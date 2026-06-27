@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../domain/entities/product.dart';
 import '../../../../domain/usecases/products_usecase.dart';
+import '../../widgets/custom_snackbar.dart';
 
 class CartController extends GetxController {
   final GetProductsUseCase productUseCase;
@@ -35,21 +35,15 @@ class CartController extends GetxController {
     try {
       await productUseCase.addProductToCart(product);
       await loadCart();
-      Get.snackbar(
+      CustomSnackbar.showSuccess(
         'Giỏ hàng',
         'Đã thêm "${product.title}" vào giỏ hàng!',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 1),
       );
     } catch (e) {
       error.value = e.toString();
-      Get.snackbar(
+      CustomSnackbar.showError(
         'Lỗi giỏ hàng',
         'Không thể thêm sản phẩm: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
       );
     } finally {
       isLoading.value = false;
@@ -61,21 +55,15 @@ class CartController extends GetxController {
     try {
       await productUseCase.removeProductFromCart(product.id);
       await loadCart();
-      Get.snackbar(
+      CustomSnackbar.showSuccess(
         'Giỏ hàng',
         'Đã xóa "${product.title}" khỏi giỏ hàng!',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 1),
       );
     } catch (e) {
       error.value = e.toString();
-      Get.snackbar(
+      CustomSnackbar.showError(
         'Lỗi giỏ hàng',
         'Không thể xóa sản phẩm: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
       );
     } finally {
       isLoading.value = false;
