@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/AppTheme.dart';
 import '../../../domain/entities/product.dart';
+import 'package:get/get.dart';
 import 'custom_cached_image.dart';
+import '../categories/controller/categories_controller.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -57,24 +59,32 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Danh mục với font chữ 6px radius tag
-                  // Container(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  //   decoration: BoxDecoration(
-                  //     color: AppTheme.primaryColor.withOpacity(0.08),
-                  //     borderRadius: BorderRadius.circular(6), // 6px radius cho tag
-                  //   ),
-                  //   child: Text(
-                  //     product.category.toUpperCase(),
-                  //     style: const TextStyle(
-                  //       fontFamily: AppTheme.fontFamily,
-                  //       fontSize: 9,
-                  //       fontWeight: FontWeight.bold,
-                  //       letterSpacing: 0.5,
-                  //       color: AppTheme.primaryColor,
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(
+                        6,
+                      ), // 6px radius cho tag
+                    ),
+                    child: Obx(
+                      () => Text(
+                        Get.find<CategoriesController>()
+                            .getCategoryName(product.category),
+                        style: const TextStyle(
+                          fontFamily: AppTheme.fontFamily,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
 
                   // Tiêu đề sản phẩm
                   Text(

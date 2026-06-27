@@ -19,6 +19,28 @@ class Product {
     required this.sku,
   });
 
+  Product copyWith({
+    String? id,
+    String? title,
+    double? price,
+    String? description,
+    String? imageUrl,
+    double? rating,
+    String? category,
+    String? sku,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      price: price ?? this.price,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+      rating: rating ?? this.rating,
+      category: category ?? this.category,
+      sku: sku ?? this.sku,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

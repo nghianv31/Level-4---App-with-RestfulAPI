@@ -7,6 +7,8 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../controller/catalog_controller.dart';
+import '../../categories/controller/categories_controller.dart';
+import '../../../../core/theme/AppTheme.dart';
 
 class AddProductView extends StatefulWidget {
   final Product? product;
@@ -19,15 +21,16 @@ class AddProductView extends StatefulWidget {
 
 class _AddProductViewState extends State<AddProductView> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late TextEditingController _titleController;
   late TextEditingController _priceController;
   late TextEditingController _skuController;
-  late TextEditingController _categoryController;
   late TextEditingController _imageUrlController;
   late TextEditingController _descriptionController;
-  
+
   final catalogController = Get.find<CatalogController>();
+  final categoriesController = Get.find<CategoriesController>();
+  String? _selectedCategory;
 
   // Danh sách ảnh mẫu ngẫu nhiên để sản phẩm tự động có ảnh Unsplash tuyệt đẹp
   final List<String> _mockImages = [
@@ -44,14 +47,24 @@ class _AddProductViewState extends State<AddProductView> {
   @override
   void initState() {
     super.initState();
-    
+
     // Khởi tạo các controller theo chế độ tương ứng
-    _titleController = TextEditingController(text: _isEdit ? (widget.product?.title ?? '') : '');
-    _priceController = TextEditingController(text: _isEdit ? (widget.product?.price.toString() ?? '') : '');
-    _skuController = TextEditingController(text: _isEdit ? (widget.product?.sku ?? '') : '');
-    _categoryController = TextEditingController(text: _isEdit ? (widget.product?.category ?? '') : '');
-    _imageUrlController = TextEditingController(text: _isEdit ? (widget.product?.imageUrl ?? '') : '');
-    _descriptionController = TextEditingController(text: _isEdit ? (widget.product?.description ?? '') : '');
+    _titleController = TextEditingController(
+      text: _isEdit ? (widget.product?.title ?? '') : '',
+    );
+    _priceController = TextEditingController(
+      text: _isEdit ? (widget.product?.price.toString() ?? '') : '',
+    );
+    _skuController = TextEditingController(
+      text: _isEdit ? (widget.product?.sku ?? '') : '',
+    );
+    _selectedCategory = _isEdit ? widget.product?.category : null;
+    _imageUrlController = TextEditingController(
+      text: _isEdit ? (widget.product?.imageUrl ?? '') : '',
+    );
+    _descriptionController = TextEditingController(
+      text: _isEdit ? (widget.product?.description ?? '') : '',
+    );
 
     // Lắng nghe biến errorMessage từ catalogController để hiển thị dialog khi có lỗi
     _errorWorker = ever(catalogController.errorMessage, (String message) {
@@ -77,7 +90,6 @@ class _AddProductViewState extends State<AddProductView> {
     _titleController.dispose();
     _priceController.dispose();
     _skuController.dispose();
-    _categoryController.dispose();
     _imageUrlController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -104,13 +116,6 @@ class _AddProductViewState extends State<AddProductView> {
   String? _validateSku(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Mã SKU không được để trống';
-    }
-    return null;
-  }
-
-  String? _validateCategory(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Danh mục không được để trống';
     }
     return null;
   }
@@ -145,16 +150,19 @@ class _AddProductViewState extends State<AddProductView> {
 
       final submittedProduct = ProductModel(
         id: _isEdit
-            ? (widget.product?.id ?? 'p_edit_${DateTime.now().millisecondsSinceEpoch}')
+            ? (widget.product?.id ??
+                  'p_edit_${DateTime.now().millisecondsSinceEpoch}')
             : 'p_new_${DateTime.now().millisecondsSinceEpoch}',
         title: _titleController.text.trim(),
         price: double.parse(_priceController.text.trim()),
         description: _descriptionController.text.trim(),
         imageUrl: enteredImageUrl.isNotEmpty
             ? enteredImageUrl
-            : (_isEdit ? (widget.product?.imageUrl ?? randomImage) : randomImage),
+            : (_isEdit
+                  ? (widget.product?.imageUrl ?? randomImage)
+                  : randomImage),
         rating: _isEdit ? (widget.product?.rating ?? 0.0) : 0.0,
-        category: _categoryController.text.trim().toUpperCase(),
+        category: _selectedCategory ?? '',
         sku: _skuController.text.trim().toUpperCase(),
       );
 
@@ -173,7 +181,9 @@ class _AddProductViewState extends State<AddProductView> {
 
       // Chỉ chuyển trang và báo thành công nếu không có lỗi xảy ra
       if (catalogController.errorMessage.isEmpty) {
-        Get.back(result: submittedProduct); // Trả về sản phẩm để cập nhật màn chi tiết (nếu ở chế độ Edit)
+        Get.back(
+          result: submittedProduct,
+        ); // Trả về sản phẩm để cập nhật màn chi tiết (nếu ở chế độ Edit)
 
         CustomSnackbar.showSuccess(
           'Thành công',
@@ -237,24 +247,133 @@ class _AddProductViewState extends State<AddProductView> {
                   const SizedBox(height: 20),
 
                   // Trường Danh mục
-                  CustomTextField(
-                    labelText: 'Danh mục',
-                    hintText:
-                        'Nhập danh mục sản phẩm (VD: ĐIỆN THOẠI, THỜI TRANG)',
-                    controller: _categoryController,
-                    prefixIcon: Icons.category_outlined,
-                    isRequired: true,
-                    validator: _validateCategory,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'Danh mục',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.onSurface,
+                            ),
+                          ),
+                          const Text(
+                            ' *',
+                            style: TextStyle(
+                              color: AppTheme.errorColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(() {
+                        // Tạo list các items cho dropdown
+                        final items = categoriesController.categories.map((
+                          category,
+                        ) {
+                          return DropdownMenuItem<String>(
+                            value: category.id.toString(),
+                            child: Text(category.name),
+                          );
+                        }).toList();
+
+                        // Kiểm tra xem _selectedCategory có tồn tại trong danh sách không
+                        // Nếu không tồn tại thì đặt thành null để tránh lỗi UI
+                        final isValidSelection = items.any(
+                          (item) => item.value == _selectedCategory,
+                        );
+                        final currentValue = isValidSelection
+                            ? _selectedCategory
+                            : null;
+
+                        return DropdownButtonFormField<String>(
+                          value: currentValue,
+                          items: items,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCategory = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Danh mục không được để trống';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Chọn danh mục',
+                            hintStyle: const TextStyle(
+                              color: AppTheme.neutralColor,
+                              fontSize: 14,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.category_outlined,
+                              color: AppTheme.neutralColor,
+                              size: 20,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppTheme.outlineVariant,
+                                width: 1.5,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppTheme.outlineVariant,
+                                width: 1.5,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppTheme.primaryColor,
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppTheme.errorColor,
+                                width: 2,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppTheme.errorColor,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
                   ),
                   const SizedBox(height: 20),
 
                   // Trường URL hình ảnh
                   CustomTextField(
                     labelText: 'URL hình ảnh',
-                    hintText: _isEdit ? 'Nhập URL hình ảnh mới' : 'Nhập URL hình ảnh (không bắt buộc)',
+                    hintText: _isEdit
+                        ? 'Nhập URL hình ảnh mới'
+                        : 'Nhập URL hình ảnh (không bắt buộc)',
                     controller: _imageUrlController,
                     prefixIcon: Icons.image_outlined,
-                    isRequired: _isEdit, // Chế độ sửa cần hình ảnh cụ thể, thêm mới có thể bỏ trống để lấy ảnh random
+                    isRequired:
+                        _isEdit, // Chế độ sửa cần hình ảnh cụ thể, thêm mới có thể bỏ trống để lấy ảnh random
                     validator: _validateImageUrl,
                   ),
                   const SizedBox(height: 20),
@@ -273,7 +392,9 @@ class _AddProductViewState extends State<AddProductView> {
                   // Nút Lưu sản phẩm / Lưu thay đổi
                   CustomButton(
                     text: _isEdit ? 'Lưu thay đổi' : 'Lưu sản phẩm',
-                    icon: _isEdit ? Icons.save_rounded : Icons.add_circle_outline_rounded,
+                    icon: _isEdit
+                        ? Icons.save_rounded
+                        : Icons.add_circle_outline_rounded,
                     isLoading: _isSaving,
                     onPressed: _submitProduct,
                   ),

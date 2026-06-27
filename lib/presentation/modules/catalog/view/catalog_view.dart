@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/AppTheme.dart';
 import '../../../../core/values/app_strings.dart';
-import '../../../../data/datasources/local/setting_box.dart';
-import '../../../../data/datasources/local/hiveToken.dart';
 import '../../../../core/routes/app_pages.dart';
+import '../../categories/controller/categories_controller.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_skeleton.dart';
 import '../../widgets/custom_state_widget.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../cart/controller/cart_controller.dart';
 import '../controller/catalog_controller.dart';
+import 'catalog_drawer.dart';
 
 class CatalogView extends GetView<CatalogController> {
   const CatalogView({super.key});
@@ -18,28 +18,51 @@ class CatalogView extends GetView<CatalogController> {
   @override
   Widget build(BuildContext context) {
     final cartController = Get.find<CartController>();
+    final categoryController = Get.find<CategoriesController>();
 
     return Scaffold(
-      appBar: _buildAppBar(cartController),
+      appBar: _buildAppBar(cartController, context),
+      drawer: const CatalogDrawer(),
       body: Obx(() {
         if (controller.isLoading.value && controller.products.isEmpty) {
           return _buildLoadingState();
         }
 
-        if (controller.errorMessage.isNotEmpty && controller.products.isEmpty) {
+        if (controller.errorMessage.isNotEmpty || controller.products.isEmpty) {
           return _buildErrorState();
         }
 
-        return _buildProductList(cartController);
+        return _buildProductList(cartController, categoryController);
       }),
       // Nút hành động nổi FAB hình dấu cộng "+" mở trang thêm sản phẩm
-      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButton: Obx(
+        () => controller.errorMessage.isNotEmpty
+            ? const SizedBox.shrink()
+            : _buildFloatingActionButton(),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  PreferredSizeWidget _buildAppBar(CartController cartController) {
+  PreferredSizeWidget _buildAppBar(
+    CartController cartController,
+    BuildContext context,
+  ) {
     return AppBar(
+      leading: Builder(
+        builder: (context) {
+          return IconButton(
+            icon: const Icon(
+              Icons.category_rounded,
+              color: AppTheme.primaryColor,
+              size: 24,
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          );
+        },
+      ),
       title: const Text(
         AppStrings.appName,
         style: TextStyle(
@@ -97,14 +120,14 @@ class CatalogView extends GetView<CatalogController> {
           );
         }),
         // Nút Đăng xuất đưa về màn hình Đăng nhập
-        IconButton(
-          icon: const Icon(Icons.logout_rounded),
-          onPressed: () {
-            SettingBox.loginStatus = false;
-            Get.find<HiveToken>().saveToken('');
-            Get.offAllNamed(Routes.login);
-          },
-        ),
+        // IconButton(
+        //   icon: const Icon(Icons.logout_rounded),
+        //   onPressed: () {
+        //     SettingBox.loginStatus = false;
+        //     Get.find<HiveToken>().saveToken('');
+        //     Get.offAllNamed(Routes.login);
+        //   },
+        // ),
         const SizedBox(width: 8),
       ],
     );
@@ -134,25 +157,27 @@ class CatalogView extends GetView<CatalogController> {
     );
   }
 
-  Widget _buildProductList(CartController cartController) {
+  Widget _buildProductList(CartController cartController, CategoriesController categoryController) {
     // Tích hợp Pull-to-refresh spinner màu xanh dương của thiết kế
     return SafeArea(
-      child: RefreshIndicator(
-        color: AppTheme.primaryColor,
-        backgroundColor: Colors.white,
-        onRefresh: () => controller.loadProducts(isRefresh: true),
-        child: CustomScrollView(
-          controller: controller.scrollController,
-          slivers: [
-            _buildProductGrid(cartController),
-            _buildLoadingMoreIndicator(),
-          ],
-        ),
-      ),
+      child: controller.filteredProductsList.isEmpty
+          ? _buildEmptyState()
+          : RefreshIndicator(
+              color: AppTheme.primaryColor,
+              backgroundColor: Colors.white,
+              onRefresh: () => controller.loadProducts(isRefresh: true),
+              child: CustomScrollView(
+                controller: controller.scrollController,
+                slivers: [
+                  _buildProductGrid(cartController, categoryController),
+                  _buildLoadingMoreIndicator(),
+                ],
+              ),
+            ),
     );
   }
 
-  Widget _buildProductGrid(CartController cartController) {
+  Widget _buildProductGrid(CartController cartController, CategoriesController categoryController) {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       sliver: SliverGrid(
@@ -164,17 +189,17 @@ class CatalogView extends GetView<CatalogController> {
               0.58, // Điều chỉnh tỷ lệ để cân đối ảnh 1:1 + nội dung chữ tránh overflow
         ),
         delegate: SliverChildBuilderDelegate((context, index) {
-          final product = controller.products[index];
+          final product = controller.filteredProductsList[index];
           return ProductCard(
             product: product,
             onTap: () {
-              Get.toNamed(Routes.productDetail, arguments: product);
+              Get.toNamed(Routes.productDetail, arguments: product.copyWith());
             },
             onAddToCart: () {
               cartController.addToCart(product);
             },
           );
-        }, childCount: controller.products.length),
+        }, childCount: controller.filteredProductsList.length),
       ),
     );
   }
@@ -202,32 +227,28 @@ class CatalogView extends GetView<CatalogController> {
   }
 
   Widget _buildFloatingActionButton() {
-    final bool isHaveError = controller.errorMessage.isNotEmpty;
-    return Visibility(
-      visible: !isHaveError,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryColor.withOpacity(0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 8), // Bóng mờ cao Level 3
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () {
-            Get.toNamed(Routes.addProduct);
-          },
-          backgroundColor: AppTheme.primaryColor,
-          elevation: 0,
-          highlightElevation: 0,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-        ),
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 8), // Bóng mờ cao Level 3
+          ),
+        ],
+      ),
+      child: FloatingActionButton(
+        onPressed: () {
+          Get.toNamed(Routes.addProduct);
+        },
+        backgroundColor: AppTheme.primaryColor,
+        elevation: 0,
+        highlightElevation: 0,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
       ),
     );
   }
@@ -252,6 +273,22 @@ class CatalogView extends GetView<CatalogController> {
             return const Text('Thử lại');
           }
         }),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: CustomStateWidget(
+        icon: Icons.production_quantity_limits_rounded,
+        iconColor: AppTheme.primaryColor.withValues(alpha: 0.6),
+        message: 'Không có sản phẩm',
+        actionButton: ElevatedButton(
+          onPressed: () {
+            controller.loadProducts();
+          },
+          child: const Text('Thử lại'),
+        ),
       ),
     );
   }

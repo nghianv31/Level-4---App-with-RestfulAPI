@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'core/theme/AppTheme.dart';
 import 'data/datasources/local/hiveToken.dart';
 import 'data/datasources/local/local_database_service.dart';
-import 'presentation/bindings/initial_binding.dart';
+import 'presentation/bindings/global_binding.dart';
 import 'core/routes/app_pages.dart';
 
 void main() async {
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
       themeMode:
           ThemeMode.light, // Ưu tiên giao diện sáng như đặc tả của DESIGN.md
       // Global DI (Khởi tạo Giỏ hàng)
-      initialBinding: InitialBinding(),
+      initialBinding: GlobalBinding(),
 
       // Định tuyến GetX
       initialRoute: AppPages.initial,

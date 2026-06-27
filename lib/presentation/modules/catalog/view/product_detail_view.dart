@@ -1,3 +1,4 @@
+import '../../categories/controller/categories_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/AppTheme.dart';
@@ -18,6 +19,7 @@ class ProductDetailView extends StatefulWidget {
 }
 
 class _ProductDetailViewState extends State<ProductDetailView> {
+  final categoryController = Get.find<CategoriesController>();
   late Product currentProduct;
 
   @override
@@ -196,14 +198,18 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     color: AppTheme.primaryColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(
-                    currentProduct.category.toUpperCase(),
-                    style: const TextStyle(
-                      fontFamily: AppTheme.fontFamily,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryColor,
-                      letterSpacing: 0.5,
+                  child: Obx(
+                    () => Text(
+                      categoryController.getCategoryName(
+                        currentProduct.category,
+                      ),
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                 ),

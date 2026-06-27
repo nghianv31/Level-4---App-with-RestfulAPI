@@ -18,6 +18,9 @@ class AppStrings {
   static const String catalogTitle = 'Sản phẩm';
   static const String cartTitle = 'Giỏ hàng';
   static const String profileTitle = 'Tài khoản';
+  static const String productCategory = 'Danh mục sản phẩm';
+  static const String allProducts = 'Tất cả sản phẩm';
+  static const String logout = 'Đăng xuất';
 
   static const String addToCart = 'Thêm vào giỏ hàng';
   static const String cartEmpty = 'Giỏ hàng của bạn đang trống';

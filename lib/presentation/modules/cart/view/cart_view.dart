@@ -14,20 +14,13 @@ class CartView extends GetView<CartController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.cartTitle),
-      ),
+      appBar: AppBar(title: const Text(AppStrings.cartTitle)),
       body: Obx(() {
         if (controller.productsCart.isEmpty) {
           return _buildEmptyState();
         }
 
-        return Column(
-          children: [
-            _buildCartList(),
-            _buildSummarySection(),
-          ],
-        );
+        return Column(children: [_buildCartList(), _buildSummarySection()]);
       }),
     );
   }
@@ -135,14 +128,14 @@ class CartView extends GetView<CartController> {
             ),
 
             // Nút xóa sản phẩm khỏi giỏ hàng
-            IconButton(
-              icon: const Icon(
-                Icons.delete_outline_rounded,
-                color: AppTheme.errorColor,
-                size: 22,
-              ),
-              onPressed: () => controller.removeFromCart(product),
-            ),
+            // IconButton(
+            //   icon: const Icon(
+            //     Icons.delete_outline_rounded,
+            //     color: AppTheme.errorColor,
+            //     size: 22,
+            //   ),
+            //   onPressed: () => controller.removeFromCart(product),
+            // ),
           ],
         ),
       ),

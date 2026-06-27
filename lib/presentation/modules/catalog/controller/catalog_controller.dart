@@ -4,22 +4,46 @@ import 'package:get/get.dart';
 import '../../../../core/exceptions/api_exception.dart';
 import '../../../../domain/entities/product.dart';
 import '../../../../domain/usecases/products_usecase.dart';
+import '../../categories/controller/categories_controller.dart';
 
 class CatalogController extends GetxController {
   final GetProductsUseCase _getProductsUseCase;
+
   CatalogController(this._getProductsUseCase);
 
   final scrollController = ScrollController();
 
   final RxList<Product> products = <Product>[].obs;
+  final RxList<Product> filteredProductsList = <Product>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool isLoadingMore = false.obs;
   final RxString errorMessage = ''.obs;
   final RxInt currentPage = 1.obs;
 
+  // List<String> get categories {
+  //   final uniqueCats = products.map((p) => p.category.toUpperCase().trim()).toSet().toList();
+  //   uniqueCats.removeWhere((c) => c.isEmpty);
+  //   uniqueCats.sort();
+  //   return uniqueCats;
+  // }
+
+  void filteredProducts(int id) {
+    if (id == 0) {
+      filteredProductsList.clear();
+      filteredProductsList.assignAll(products);
+      return;
+    }
+
+    filteredProductsList.assignAll(
+      products.where((p) => int.parse(p.category) == id).toList(),
+    );
+  }
+
   @override
   void onInit() {
     super.onInit();
+    // Đảm bảo CategoriesController được khởi tạo và gọi API ngay khi vào trang Catalog
+    Get.find<CategoriesController>();
     loadProducts();
     scrollController.addListener(_onScroll);
   }
@@ -53,18 +77,19 @@ class CatalogController extends GetxController {
       await Future.delayed(const Duration(milliseconds: 200));
       final fetched = await _getProductsUseCase.loadProducts(currentPage.value);
       products.assignAll(fetched);
+      filteredProducts(0);
     } on ApiException catch (e) {
       final ex = StringException.messageException(e.type);
       errorMessage.value = ex;
-      if (isRefresh || e.type == ApiExceptionType.invalidOrExpiredToken) {
-        products.clear();
-      }
+      // if (isRefresh || e.type == ApiExceptionType.invalidOrExpiredToken) {
+      //   products.clear();
+      // }
     } catch (e) {
       final ex = StringException.removeException(e.toString());
       errorMessage.value = ex;
-      if (isRefresh) {
-        products.clear();
-      }
+      // if (isRefresh) {
+      //   products.clear();
+      // }
     } finally {
       isLoading.value = false;
     }
@@ -99,11 +124,18 @@ class CatalogController extends GetxController {
 
   Future<void> addProduct(Product product) async {
     try {
-      await _getProductsUseCase.addProduct(product);
       // Cập nhật cục bộ vào đầu danh sách để hiển thị ngay lập tức mà không cần gọi API tải lại
       products.insert(0, product);
+      await _getProductsUseCase.addProduct(product);
+    } on ApiException catch (e) {
+      //rollback
+      products.removeWhere((p) => p.id == product.id);
+      errorMessage.value = StringException.messageException(e.type);
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      //rollback
+      products.removeWhere((p) => p.id == product.id);
+      final ex = StringException.removeException(e.toString());
+      errorMessage.value = ex;
     }
   }
 
@@ -115,20 +147,25 @@ class CatalogController extends GetxController {
       if (index != -1) {
         products[index] = product;
       }
+    } on ApiException catch (e) {
+      errorMessage.value = StringException.messageException(e.type);
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      rethrow;
+      final ex = StringException.removeException(e.toString());
+      errorMessage.value = ex;
     }
   }
 
   Future<void> deleteProduct(String id) async {
     try {
-      await _getProductsUseCase.deleteProduct(id);
       // Xóa cục bộ sản phẩm khỏi danh sách
       products.removeWhere((p) => p.id == id);
+      await _getProductsUseCase.deleteProduct(id);
+    } on ApiException catch (e) {
+      // rollback
+      errorMessage.value = StringException.messageException(e.type);
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      rethrow;
+      final ex = StringException.removeException(e.toString());
+      errorMessage.value = ex;
     }
   }
 }

@@ -1,8 +1,9 @@
 import 'package:api_demo/presentation/modules/login/view/LoginScreen.dart';
 import 'package:get/get.dart';
 import '../../data/datasources/local/setting_box.dart';
-import '../../presentation/bindings/initial_binding.dart';
 import '../../presentation/bindings/login_binding.dart';
+import '../../presentation/bindings/catalog_binding.dart';
+import '../../presentation/bindings/categories_binding.dart';
 import '../../presentation/modules/catalog/view/catalog_view.dart';
 import '../../presentation/modules/catalog/view/product_detail_view.dart';
 import '../../presentation/modules/catalog/view/add_product_view.dart';
@@ -27,7 +28,10 @@ class AppPages {
     GetPage(
       name: _Paths.catalog,
       page: () => const CatalogView(),
-      binding: InitialBinding(),
+      bindings: [
+        CatalogBinding(),
+        CategoriesBinding(),
+      ],
       transition: Transition.fadeIn,
     ),
     GetPage(
@@ -42,7 +46,6 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.cart,
-      binding: InitialBinding(),
       page: () => const CartView(),
       transition: Transition.rightToLeft,
     ),

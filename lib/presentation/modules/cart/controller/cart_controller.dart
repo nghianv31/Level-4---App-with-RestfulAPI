@@ -41,10 +41,7 @@ class CartController extends GetxController {
       );
     } catch (e) {
       error.value = e.toString();
-      CustomSnackbar.showError(
-        'Lỗi giỏ hàng',
-        'Không thể thêm sản phẩm: $e',
-      );
+      CustomSnackbar.showError('Lỗi giỏ hàng', 'Không thể thêm sản phẩm: $e');
     } finally {
       isLoading.value = false;
     }
@@ -61,10 +58,7 @@ class CartController extends GetxController {
       );
     } catch (e) {
       error.value = e.toString();
-      CustomSnackbar.showError(
-        'Lỗi giỏ hàng',
-        'Không thể xóa sản phẩm: $e',
-      );
+      CustomSnackbar.showError('Lỗi giỏ hàng', 'Không thể xóa sản phẩm: $e');
     } finally {
       isLoading.value = false;
     }

@@ -74,7 +74,9 @@ class ProductModel {
       description: json['description'] ?? '',
       imageUrl: json['image'] ?? '',
       rating: 0.0,
-      category: json['category'] is Map ? (json['category']['name'] ?? '') : '',
+      category: json['category_id'] is Map
+          ? (json['category']['name'] ?? '')
+          : json['category_id']?.toString() ?? '',
       sku: json['code'] ?? '',
     );
   }
