@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../domain/entities/product.dart';
 import '../../../../domain/usecases/products_usecase.dart';
@@ -5,6 +6,8 @@ import '../../widgets/custom_snackbar.dart';
 
 class CartController extends GetxController {
   final GetProductsUseCase productUseCase;
+
+  final GlobalKey cartKey = GlobalKey();
 
   CartController(this.productUseCase);
 
@@ -35,10 +38,10 @@ class CartController extends GetxController {
     try {
       await productUseCase.addProductToCart(product);
       await loadCart();
-      CustomSnackbar.showSuccess(
-        'Giỏ hàng',
-        'Đã thêm "${product.title}" vào giỏ hàng!',
-      );
+      // CustomSnackbar.showSuccess(
+      //   'Giỏ hàng',
+      //   'Đã thêm "${product.title}" vào giỏ hàng!',
+      // );
     } catch (e) {
       error.value = e.toString();
       CustomSnackbar.showError('Lỗi giỏ hàng', 'Không thể thêm sản phẩm: $e');

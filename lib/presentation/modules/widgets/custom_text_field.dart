@@ -11,6 +11,8 @@ class CustomTextField extends StatefulWidget {
   final bool isRequired;
   final bool obscureText;
   final Widget? suffix;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onFieldSubmitted;
 
   const CustomTextField({
     super.key,
@@ -23,6 +25,8 @@ class CustomTextField extends StatefulWidget {
     this.isRequired = false,
     this.obscureText = false,
     this.suffix,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -62,12 +66,17 @@ class _CustomTextFieldState extends State<CustomTextField> {
             if (widget.isRequired)
               const Text(
                 ' *',
-                style: TextStyle(color: AppTheme.errorColor, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppTheme.errorColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
           ],
         ),
         const SizedBox(height: 8),
         TextFormField(
+          textInputAction: widget.textInputAction,
+          onFieldSubmitted: widget.onFieldSubmitted,
           controller: widget.controller,
           keyboardType: widget.keyboardType,
           obscureText: widget.obscureText,
@@ -94,48 +103,75 @@ class _CustomTextFieldState extends State<CustomTextField> {
           ),
           decoration: InputDecoration(
             hintText: widget.hintText,
-            hintStyle: const TextStyle(color: AppTheme.neutralColor, fontSize: 14),
-            prefixIcon: Icon(widget.prefixIcon, color: AppTheme.neutralColor, size: 20),
-            
+            hintStyle: const TextStyle(
+              color: AppTheme.neutralColor,
+              fontSize: 14,
+            ),
+            prefixIcon: Icon(
+              widget.prefixIcon,
+              color: AppTheme.neutralColor,
+              size: 20,
+            ),
+
             // Suffix icon thể hiện kết quả xác thực trực quan hoặc widget tùy biến từ bên ngoài (như mắt ẩn/hiện mật khẩu)
-            suffixIcon: widget.suffix ?? (_errorText != null
-                ? const Icon(
-                    Icons.warning_rounded,
-                    color: AppTheme.errorColor,
-                    size: 20,
-                  )
-                : _isValid
+            suffixIcon:
+                widget.suffix ??
+                (_errorText != null
+                    ? const Icon(
+                        Icons.warning_rounded,
+                        color: AppTheme.errorColor,
+                        size: 20,
+                      )
+                    : _isValid
                     ? const Icon(
                         Icons.check_circle_rounded,
                         color: AppTheme.secondaryColor,
                         size: 20,
                       )
                     : null),
-                    
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             filled: true,
             fillColor: Colors.white,
-            
+
             // Cấu hình viền chuẩn 12px bo tròn theo thiết kế
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.outlineVariant, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppTheme.outlineVariant,
+                width: 1.5,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.outlineVariant, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppTheme.outlineVariant,
+                width: 1.5,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+              borderSide: const BorderSide(
+                color: AppTheme.primaryColor,
+                width: 2,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.errorColor, width: 2),
+              borderSide: const BorderSide(
+                color: AppTheme.errorColor,
+                width: 2,
+              ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.errorColor, width: 2),
+              borderSide: const BorderSide(
+                color: AppTheme.errorColor,
+                width: 2,
+              ),
             ),
           ),
         ),

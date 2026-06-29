@@ -25,13 +25,13 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
 
   @override
   Future<void> addCategory(String category) {
-    // TODO: implement addCategory
+    
     throw UnimplementedError();
   }
 
   @override
   Future<void> deleteCategory(String category) {
-    // TODO: implement deleteCategory
+    
     throw UnimplementedError();
   }
 }

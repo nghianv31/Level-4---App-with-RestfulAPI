@@ -8,6 +8,7 @@ import '../../widgets/product_card.dart';
 import '../../widgets/product_skeleton.dart';
 import '../../widgets/custom_state_widget.dart';
 import '../../widgets/custom_snackbar.dart';
+import '../../widgets/cart_animation_util.dart';
 import '../../cart/controller/cart_controller.dart';
 import '../controller/catalog_controller.dart';
 import 'catalog_drawer.dart';
@@ -75,6 +76,7 @@ class CatalogView extends GetView<CatalogController> {
         Obx(() {
           final totalCartItems = cartController.totalItems;
           return IconButton(
+            key: cartController.cartKey,
             icon: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -157,27 +159,177 @@ class CatalogView extends GetView<CatalogController> {
     );
   }
 
-  Widget _buildProductList(CartController cartController, CategoriesController categoryController) {
-    // Tích hợp Pull-to-refresh spinner màu xanh dương của thiết kế
+  Widget _buildProductList(
+    CartController cartController,
+    CategoriesController categoryController,
+  ) {
     return SafeArea(
-      child: controller.filteredProductsList.isEmpty
-          ? _buildEmptyState()
-          : RefreshIndicator(
-              color: AppTheme.primaryColor,
-              backgroundColor: Colors.white,
-              onRefresh: () => controller.loadProducts(isRefresh: true),
-              child: CustomScrollView(
-                controller: controller.scrollController,
-                slivers: [
-                  _buildProductGrid(cartController, categoryController),
-                  _buildLoadingMoreIndicator(),
-                ],
-              ),
-            ),
+      child: Column(
+        children: [
+          _buildSearchAndFilter(),
+          Expanded(
+            child: controller.filteredProductsList.isEmpty
+                ? _buildEmptyState()
+                : RefreshIndicator(
+                    color: AppTheme.primaryColor,
+                    backgroundColor: Colors.white,
+                    onRefresh: () => controller.loadProducts(isRefresh: true),
+                    child: CustomScrollView(
+                      controller: controller.scrollController,
+                      slivers: [
+                        _buildProductGrid(cartController, categoryController),
+                        _buildLoadingMoreIndicator(),
+                      ],
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildProductGrid(CartController cartController, CategoriesController categoryController) {
+  Widget _buildSearchAndFilter() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Column(
+        children: [
+          // Search Bar
+          TextField(
+            onChanged: controller.onSearchChanged,
+            decoration: InputDecoration(
+              hintText: AppStrings.searchProduct,
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppTheme.primaryColor,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 16,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.primaryColor),
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Filter & Sort Row
+          Row(
+            children: [
+              Expanded(
+                child: Obx(
+                  () => DropdownButtonFormField<String>(
+                    value: controller.sortName.value,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      isDense: true,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    icon: const Icon(Icons.sort_by_alpha, size: 20),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'none',
+                        child: Text(
+                          AppStrings.sortDefault,
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'name_asc',
+                        child: Text(
+                          AppStrings.sortNameAsc,
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'name_desc',
+                        child: Text(
+                          AppStrings.sortNameDesc,
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) controller.setSortName(val);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Obx(
+                  () => DropdownButtonFormField<String>(
+                    value: controller.sortPrice.value,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      isDense: true,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    icon: const Icon(Icons.price_change_outlined, size: 20),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'none',
+                        child: Text(
+                          AppStrings.sortDefault,
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'price_asc',
+                        child: Text(
+                          AppStrings.sortPriceAsc,
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'price_desc',
+                        child: Text(
+                          AppStrings.sortPriceDesc,
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) controller.setSortPrice(val);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductGrid(
+    CartController cartController,
+    CategoriesController categoryController,
+  ) {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       sliver: SliverGrid(
@@ -195,7 +347,12 @@ class CatalogView extends GetView<CatalogController> {
             onTap: () {
               Get.toNamed(Routes.productDetail, arguments: product.copyWith());
             },
-            onAddToCart: () {
+            onAddToCart: (imageContext) {
+              CartAnimationUtil.runFlyToCartAnimation(
+                imageContext,
+                cartController.cartKey,
+                product.imageUrl,
+              );
               cartController.addToCart(product);
             },
           );
@@ -261,7 +418,7 @@ class CatalogView extends GetView<CatalogController> {
       actionButton: ElevatedButton(
         onPressed: () {
           if (controller.errorMessage.value == AppStrings.loginAgain) {
-            Get.toNamed(Routes.login);
+            Get.offAllNamed(Routes.login);
           } else {
             controller.loadProducts();
           }

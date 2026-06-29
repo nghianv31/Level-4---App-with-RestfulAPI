@@ -87,7 +87,7 @@ class ProductModel {
       "code": sku,
       "price": price,
       "stock": 100,
-      "category_id": 100,
+      "category_id": int.parse(category),
       "description": description,
       "image": imageUrl,
     };

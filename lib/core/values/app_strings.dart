@@ -22,6 +22,17 @@ class AppStrings {
   static const String allProducts = 'Tất cả sản phẩm';
   static const String logout = 'Đăng xuất';
 
+  // Catalog Search, Sort, Filter
+  static const String searchProduct = 'Tìm kiếm sản phẩm...';
+  static const String sortDefault = 'Mặc định';
+  static const String sortNameAsc = 'Tên: A-Z';
+  static const String sortNameDesc = 'Tên: Z-A';
+  static const String sortPriceAsc = 'Giá: ↑';
+  static const String sortPriceDesc = 'Giá: ↓';
+  static const String allStatus = 'Tất cả trạng thái';
+  static const String statusActive = 'Active';
+  static const String statusInactive = 'Inactive';
+
   static const String addToCart = 'Thêm vào giỏ hàng';
   static const String cartEmpty = 'Giỏ hàng của bạn đang trống';
   static const String checkout = 'Thanh toán';

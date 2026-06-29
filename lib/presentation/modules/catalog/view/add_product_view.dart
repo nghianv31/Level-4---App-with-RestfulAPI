@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'package:api_demo/core/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../core/values/app_strings.dart';
 import '../../../../data/models/product_model.dart';
 import '../../../../domain/entities/product.dart';
 import '../../widgets/custom_button.dart';
@@ -77,7 +79,11 @@ class _AddProductViewState extends State<AddProductView> {
           buttonColor: Theme.of(context).primaryColor,
           onConfirm: () {
             catalogController.errorMessage.value = ''; // Reset lỗi
-            Get.back(); // Đóng dialog
+            if (message == AppStrings.loginAgain) {
+              Get.offAllNamed(Routes.login);
+            } else {
+              Get.back();
+            }
           },
         );
       }
@@ -143,7 +149,7 @@ class _AddProductViewState extends State<AddProductView> {
       catalogController.errorMessage.value = '';
 
       // Giả lập lưu vào kho dữ liệu 1s
-      await Future.delayed(const Duration(milliseconds: 1000));
+      // await Future.delayed(const Duration(milliseconds: 1000));
 
       final randomImage = _mockImages[Random().nextInt(_mockImages.length)];
       final enteredImageUrl = _imageUrlController.text.trim();
@@ -182,7 +188,7 @@ class _AddProductViewState extends State<AddProductView> {
       // Chỉ chuyển trang và báo thành công nếu không có lỗi xảy ra
       if (catalogController.errorMessage.isEmpty) {
         Get.back(
-          result: submittedProduct,
+          result: submittedProduct.toEntity(),
         ); // Trả về sản phẩm để cập nhật màn chi tiết (nếu ở chế độ Edit)
 
         CustomSnackbar.showSuccess(
@@ -197,208 +203,218 @@ class _AddProductViewState extends State<AddProductView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? 'Chỉnh Sửa Sản Phẩm' : 'Thêm Sản Phẩm Mới'),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Trường Tên sản phẩm
-                  CustomTextField(
-                    labelText: 'Tên sản phẩm',
-                    hintText: 'Nhập tên sản phẩm',
-                    controller: _titleController,
-                    prefixIcon: Icons.shopping_bag_outlined,
-                    isRequired: true,
-                    validator: _validateTitle,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Trường Giá bán
-                  CustomTextField(
-                    labelText: 'Giá bán (\$)',
-                    hintText: 'Nhập giá bán (VD: 99.99)',
-                    controller: _priceController,
-                    prefixIcon: Icons.attach_money_rounded,
-                    isRequired: true,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_isEdit ? 'Chỉnh Sửa Sản Phẩm' : 'Thêm Sản Phẩm Mới'),
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Trường Tên sản phẩm
+                    CustomTextField(
+                      labelText: 'Tên sản phẩm',
+                      hintText: 'Nhập tên sản phẩm',
+                      controller: _titleController,
+                      prefixIcon: Icons.shopping_bag_outlined,
+                      isRequired: true,
+                      validator: _validateTitle,
+                      textInputAction: TextInputAction.next,
                     ),
-                    validator: _validatePrice,
-                  ),
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // Trường Mã SKU
-                  CustomTextField(
-                    labelText: 'Mã SKU sản phẩm',
-                    hintText: 'Nhập mã SKU (VD: SP-LTM-09)',
-                    controller: _skuController,
-                    prefixIcon: Icons.qr_code_scanner_rounded,
-                    isRequired: true,
-                    validator: _validateSku,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Trường Danh mục
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            'Danh mục',
-                            style: TextStyle(
-                              fontFamily: AppTheme.fontFamily,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.onSurface,
-                            ),
-                          ),
-                          const Text(
-                            ' *',
-                            style: TextStyle(
-                              color: AppTheme.errorColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                    // Trường Giá bán
+                    CustomTextField(
+                      labelText: 'Giá bán (\$)',
+                      hintText: 'Nhập giá bán (VD: 99.99)',
+                      controller: _priceController,
+                      prefixIcon: Icons.attach_money_rounded,
+                      isRequired: true,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
-                      const SizedBox(height: 8),
-                      Obx(() {
-                        // Tạo list các items cho dropdown
-                        final items = categoriesController.categories.map((
-                          category,
-                        ) {
-                          return DropdownMenuItem<String>(
-                            value: category.id.toString(),
-                            child: Text(category.name),
+                      validator: _validatePrice,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Trường Mã SKU
+                    CustomTextField(
+                      labelText: 'Mã SKU sản phẩm',
+                      hintText: 'Nhập mã SKU (VD: SP-LTM-09)',
+                      controller: _skuController,
+                      prefixIcon: Icons.qr_code_scanner_rounded,
+                      isRequired: true,
+                      validator: _validateSku,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Trường Danh mục
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text(
+                              'Danh mục',
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.onSurface,
+                              ),
+                            ),
+                            const Text(
+                              ' *',
+                              style: TextStyle(
+                                color: AppTheme.errorColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(() {
+                          // Tạo list các items cho dropdown
+                          final items = categoriesController.categories.map((
+                            category,
+                          ) {
+                            return DropdownMenuItem<String>(
+                              value: category.id.toString(),
+                              child: Text(category.name),
+                            );
+                          }).toList();
+
+                          // Kiểm tra xem _selectedCategory có tồn tại trong danh sách không
+                          // Nếu không tồn tại thì đặt thành null để tránh lỗi UI
+                          final isValidSelection = items.any(
+                            (item) => item.value == _selectedCategory,
                           );
-                        }).toList();
+                          final currentValue = isValidSelection
+                              ? _selectedCategory
+                              : null;
 
-                        // Kiểm tra xem _selectedCategory có tồn tại trong danh sách không
-                        // Nếu không tồn tại thì đặt thành null để tránh lỗi UI
-                        final isValidSelection = items.any(
-                          (item) => item.value == _selectedCategory,
-                        );
-                        final currentValue = isValidSelection
-                            ? _selectedCategory
-                            : null;
-
-                        return DropdownButtonFormField<String>(
-                          value: currentValue,
-                          items: items,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCategory = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Danh mục không được để trống';
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Chọn danh mục',
-                            hintStyle: const TextStyle(
-                              color: AppTheme.neutralColor,
-                              fontSize: 14,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.category_outlined,
-                              color: AppTheme.neutralColor,
-                              size: 20,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: AppTheme.outlineVariant,
-                                width: 1.5,
+                          return DropdownButtonFormField<String>(
+                            value: currentValue,
+                            items: items,
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedCategory = value;
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Danh mục không được để trống';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Chọn danh mục',
+                              hintStyle: const TextStyle(
+                                color: AppTheme.neutralColor,
+                                fontSize: 14,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.category_outlined,
+                                color: AppTheme.neutralColor,
+                                size: 20,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppTheme.outlineVariant,
+                                  width: 1.5,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppTheme.outlineVariant,
+                                  width: 1.5,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppTheme.primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppTheme.errorColor,
+                                  width: 2,
+                                ),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppTheme.errorColor,
+                                  width: 2,
+                                ),
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: AppTheme.outlineVariant,
-                                width: 1.5,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: AppTheme.primaryColor,
-                                width: 2,
-                              ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: AppTheme.errorColor,
-                                width: 2,
-                              ),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: AppTheme.errorColor,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
+                          );
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
 
-                  // Trường URL hình ảnh
-                  CustomTextField(
-                    labelText: 'URL hình ảnh',
-                    hintText: _isEdit
-                        ? 'Nhập URL hình ảnh mới'
-                        : 'Nhập URL hình ảnh (không bắt buộc)',
-                    controller: _imageUrlController,
-                    prefixIcon: Icons.image_outlined,
-                    isRequired:
-                        _isEdit, // Chế độ sửa cần hình ảnh cụ thể, thêm mới có thể bỏ trống để lấy ảnh random
-                    validator: _validateImageUrl,
-                  ),
-                  const SizedBox(height: 20),
+                    // Trường URL hình ảnh
+                    CustomTextField(
+                      labelText: 'URL hình ảnh',
+                      hintText: _isEdit
+                          ? 'Nhập URL hình ảnh mới'
+                          : 'Nhập URL hình ảnh (không bắt buộc)',
+                      controller: _imageUrlController,
+                      prefixIcon: Icons.image_outlined,
+                      isRequired:
+                          _isEdit, // Chế độ sửa cần hình ảnh cụ thể, thêm mới có thể bỏ trống để lấy ảnh random
+                      validator: _validateImageUrl,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 20),
 
-                  // Trường Mô tả sản phẩm
-                  CustomTextField(
-                    labelText: 'Mô tả chi tiết',
-                    hintText: 'Mô tả tính năng, cấu hình, thông số sản phẩm...',
-                    controller: _descriptionController,
-                    prefixIcon: Icons.description_outlined,
-                    isRequired: true,
-                    validator: _validateDescription,
-                  ),
-                  const SizedBox(height: 36),
+                    // Trường Mô tả sản phẩm
+                    CustomTextField(
+                      labelText: 'Mô tả chi tiết',
+                      hintText:
+                          'Mô tả tính năng, cấu hình, thông số sản phẩm...',
+                      controller: _descriptionController,
+                      prefixIcon: Icons.description_outlined,
+                      isRequired: true,
+                      validator: _validateDescription,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _submitProduct(),
+                    ),
+                    const SizedBox(height: 36),
 
-                  // Nút Lưu sản phẩm / Lưu thay đổi
-                  CustomButton(
-                    text: _isEdit ? 'Lưu thay đổi' : 'Lưu sản phẩm',
-                    icon: _isEdit
-                        ? Icons.save_rounded
-                        : Icons.add_circle_outline_rounded,
-                    isLoading: _isSaving,
-                    onPressed: _submitProduct,
-                  ),
-                ],
+                    // Nút Lưu sản phẩm / Lưu thay đổi
+                    CustomButton(
+                      text: _isEdit ? 'Lưu thay đổi' : 'Lưu sản phẩm',
+                      icon: _isEdit
+                          ? Icons.save_rounded
+                          : Icons.add_circle_outline_rounded,
+                      isLoading: _isSaving,
+                      onPressed: _submitProduct,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

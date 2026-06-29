@@ -26,7 +26,6 @@ class LoginController extends GetxController
 
   late AnimationController shakeController;
 
-  
   final TextEditingController accountController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -40,8 +39,6 @@ class LoginController extends GetxController
     super.onInit();
     shakeController = AnimationController(vsync: this);
   }
-
- 
 
   @override
   void onReady() {
@@ -107,7 +104,6 @@ class LoginController extends GetxController
     passwordFocus.dispose();
     shakeController.dispose();
     super.onClose();
-    super.onClose();
   }
 
   void toggleShowPass() {
@@ -135,12 +131,13 @@ class LoginController extends GetxController
 
     final formState = formKey.currentState;
     if (formState != null && formState.validate()) {
+      if (isLoading.value) return;
       isLoading.value = true;
       formState.save();
       try {
         await authUsecase.login(
-          accountController.text,
-          passwordController.text,
+          accountController.text.trim(),
+          passwordController.text.trim(),
         );
         SettingBox.countErrorLogin = 0; // Reset on success
         Get.offAllNamed(Routes.catalog);
@@ -152,7 +149,8 @@ class LoginController extends GetxController
           if (e.type == ApiExceptionType.invalidCredentials) {
             SettingBox.countErrorLogin++;
             if (SettingBox.countErrorLogin >= SettingBox.errorCountLock) {
-              SettingBox.lockUntil = DateTime.now().millisecondsSinceEpoch +
+              SettingBox.lockUntil =
+                  DateTime.now().millisecondsSinceEpoch +
                   (SettingBox.timeLock * 1000);
               _checkLockState();
             }

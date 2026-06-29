@@ -7,7 +7,6 @@ import '../../../../domain/entities/product.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_cached_image.dart';
 import '../../cart/controller/cart_controller.dart';
-import '../../widgets/custom_snackbar.dart';
 import '../controller/catalog_controller.dart';
 import 'add_product_view.dart';
 
@@ -41,33 +40,12 @@ class _ProductDetailViewState extends State<ProductDetailView> {
       confirmTextColor: Colors.white,
       cancelTextColor: Colors.redAccent,
       buttonColor: AppTheme.errorColor,
-      onConfirm: () async {
+      onConfirm: () {
         Get.back(); // Đóng dialog xác nhận
+        Get.back(); // Quay lại trang catalog ngay lập tức
 
-        // Hiển thị loading dialog
-        Get.dialog(
-          const Center(
-            child: CircularProgressIndicator(color: AppTheme.primaryColor),
-          ),
-          barrierDismissible: false,
-        );
-
-        try {
-          await catalogController.deleteProduct(currentProduct.id);
-          Get.back(); // Đóng loading dialog
-          Get.back(); // Quay lại trang catalog
-
-          CustomSnackbar.showSuccess(
-            'Thành công',
-            'Đã xóa sản phẩm thành công!',
-          );
-        } catch (e) {
-          Get.back(); // Đóng loading dialog
-          CustomSnackbar.showError(
-            'Lỗi',
-            e.toString().replaceFirst('Exception: ', ''),
-          );
-        }
+        // Fire and forget (Gửi và không chờ)
+        catalogController.deleteProduct(currentProduct.id);
       },
     );
   }

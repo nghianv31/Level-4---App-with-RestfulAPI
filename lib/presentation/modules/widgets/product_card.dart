@@ -8,7 +8,7 @@ import '../categories/controller/categories_controller.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
-  final VoidCallback onAddToCart;
+  final Function(BuildContext imageContext) onAddToCart;
 
   const ProductCard({
     super.key,
@@ -19,6 +19,8 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BuildContext? imageContext;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -40,15 +42,20 @@ class ProductCard extends StatelessWidget {
           children: [
             // Ảnh sản phẩm tự động co giãn theo không gian trống để tránh overflow
             Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(11),
-                ),
-                child: CustomCachedImage(
-                  imageUrl: product.imageUrl,
-                  fit: BoxFit.cover,
-                  errorIconSize: 40.0,
-                ),
+              child: Builder(
+                builder: (ctx) {
+                  imageContext = ctx;
+                  return ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(11),
+                    ),
+                    child: CustomCachedImage(
+                      imageUrl: product.imageUrl,
+                      fit: BoxFit.cover,
+                      errorIconSize: 40.0,
+                    ),
+                  );
+                }
               ),
             ),
 
@@ -100,29 +107,6 @@ class ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
 
-                  // Đánh giá sao
-                  // Row(
-                  //   children: [
-                  //     const Icon(
-                  //       Icons.star_rounded,
-                  //       color: AppTheme
-                  //           .tertiaryColor, // Màu vàng hổ phách của thiết kế
-                  //       size: 14,
-                  //     ),
-                  //     const SizedBox(width: 2),
-                  //     Text(
-                  //       product.rating.toString(),
-                  //       style: const TextStyle(
-                  //         fontFamily: AppTheme.fontFamily,
-                  //         fontSize: 11,
-                  //         fontWeight: FontWeight.bold,
-                  //         color: AppTheme.onSurface,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  // const SizedBox(height: 8),
-
                   // Dòng chân thẻ: Giá tiền và Nút Thêm vào giỏ
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,7 +123,11 @@ class ProductCard extends StatelessWidget {
 
                       // Nút tròn Add To Cart với vùng chạm tối thiểu 48x48
                       InkWell(
-                        onTap: onAddToCart,
+                        onTap: () {
+                          if (imageContext != null) {
+                            onAddToCart(imageContext!);
+                          }
+                        },
                         customBorder: const CircleBorder(),
                         child: Container(
                           width: 48,

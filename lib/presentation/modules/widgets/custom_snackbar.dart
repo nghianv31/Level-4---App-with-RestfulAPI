@@ -15,7 +15,7 @@ class CustomSnackbar {
       icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 1),
       boxShadows: [
         BoxShadow(
           color: Colors.black.withOpacity(0.1),
@@ -57,7 +57,7 @@ class CustomSnackbar {
       icon: const Icon(Icons.info_outline_rounded, color: Colors.white),
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 1),
       boxShadows: [
         BoxShadow(
           color: Colors.black.withOpacity(0.1),

@@ -41,7 +41,7 @@ class CategoriesController extends GetxController {
     // GIAO TIẾP: Tìm ProductController và yêu cầu nó tải lại dữ liệu
     // Nhờ GetX, bạn có thể gọi Controller khác từ bất cứ đâu
     if (Get.isRegistered<CatalogController>()) {
-      Get.find<CatalogController>().filteredProducts(id);
+      Get.find<CatalogController>().filteredProducts();
     }
   }
 
